@@ -21,6 +21,8 @@
 - Region: `ap-guangzhou`
 - Image: `ccr.ccs.tencentyun.com/pengdrumli/ags-ga-cua-world-full:registry-highres-nodocker-main-fastpost-eclipse-maven-blender-r-20260604-1918`
 - Image digest: `sha256:1334124b96d9bff1b6136a62003906f396cf5f7660cda54f0eccf7fbe7516396`
+- Local image ID: `sha256:ead2c0cdee340a033a44b576887928a8833fac6df8ecc2097ca797c53c62f594`
+- Local image size: `12,824,603,628` bytes，Docker 显示约 `12.8GB`。
 - Resources: `8 CPU / 16Gi`
 - Network: `PUBLIC`
 - envd port: `49983`
@@ -179,6 +181,14 @@ PYTHONPATH=src:. python3 scripts/ags_full_mock_smoke.py \
 4. Blender/R 修复：补齐 Blender runtime、R 依赖和相关 task setup 脚本问题。
 5. 当前结果：`1083 / 1154` 通过，剩余 `71` 失败。
 
+按 GA registry split 反查，当前 `1083` 个通过任务的划分是：
+
+- Train: `867`
+- Test: `216`
+- Total: `1083`
+
+当前 validated manifest 中的 `split` 字段统一写为 `all`；上面的 train/test 数量是用 `env + task_id` 回查 `benchmarks/cua_world/splits/*_split.json` 得到的。没有 unmapped task，也没有 train/test 重叠。
+
 已提交到仓库的主要修复：
 
 - `Add AGS runner support`
@@ -189,34 +199,41 @@ PYTHONPATH=src:. python3 scripts/ags_full_mock_smoke.py \
 
 | Env | 通过任务数 |
 |---|---:|
-| `astroimagej_env` | 2 |
-| `blender3d_env` | 54 |
-| `bluemail_env` | 18 |
-| `cameo_chemicals_env` | 80 |
-| `dbeaver_env` | 77 |
-| `eclipse_env` | 69 |
-| `fiji_env` | 40 |
-| `firefox_env` | 72 |
-| `geogebra_env` | 71 |
-| `google_earth_env` | 87 |
-| `hec_ras_env` | 48 |
-| `libreoffice_base_env` | 78 |
-| `libreoffice_calc_env` | 189 |
-| `libreoffice_impress_env` | 27 |
-| `libreoffice_writer_env` | 74 |
-| `microsoft_edge_env` | 7 |
-| `openice_env` | 7 |
-| `openlca_env` | 8 |
-| `rstudio_env` | 6 |
-| `stellarium_env` | 8 |
-| `sumo_env` | 15 |
-| `system_advisor_model_env` | 10 |
-| `thunderbird_env` | 10 |
-| `weasis_env` | 15 |
-| `wps_office_writer_env` | 2 |
-| `wps_spreadsheet_env` | 9 |
+| AstroImageJ (`astroimagej_env`) | 2 |
+| Blender (`blender3d_env`) | 54 |
+| BlueMail (`bluemail_env`) | 18 |
+| CAMEO Chemicals (`cameo_chemicals_env`) | 80 |
+| DBeaver (`dbeaver_env`) | 77 |
+| Eclipse (`eclipse_env`) | 69 |
+| Fiji/ImageJ (`fiji_env`) | 40 |
+| Firefox (`firefox_env`) | 72 |
+| GeoGebra (`geogebra_env`) | 71 |
+| Google Earth (`google_earth_env`) | 87 |
+| HEC-RAS (`hec_ras_env`) | 48 |
+| LibreOffice Base (`libreoffice_base_env`) | 78 |
+| LibreOffice Calc (`libreoffice_calc_env`) | 189 |
+| LibreOffice Impress (`libreoffice_impress_env`) | 27 |
+| LibreOffice Writer (`libreoffice_writer_env`) | 74 |
+| Microsoft Edge (`microsoft_edge_env`) | 7 |
+| OpenICE (`openice_env`) | 7 |
+| OpenLCA (`openlca_env`) | 8 |
+| RStudio (`rstudio_env`) | 6 |
+| Stellarium (`stellarium_env`) | 8 |
+| SUMO (`sumo_env`) | 15 |
+| System Advisor Model (`system_advisor_model_env`) | 10 |
+| Thunderbird (`thunderbird_env`) | 10 |
+| Weasis (`weasis_env`) | 15 |
+| WPS Writer (`wps_office_writer_env`) | 2 |
+| WPS Spreadsheet (`wps_spreadsheet_env`) | 9 |
 
 总计：`1083` 个任务。
+
+WPS Writer 任务少不是当前筛选丢失导致的；GA registry verified 中 `wps_office_writer_env` 本身只有两个任务：
+
+- `create_data_table`
+- `legal_contract_redline`
+
+这两个都属于 train split，test split 为 `0`。
 
 ## 剩余失败分类
 
@@ -239,6 +256,8 @@ Fiji/ImageJ 的无合成样本 runtime 已单独构建并在 AGS 沙箱中验证
 - Tool ID: `sdt-bbtyys9x`
 - Image: `ccr.ccs.tencentyun.com/pengdrumli/ags-ga-cua-world-full:registry-highres-nodocker-main-fastpost-eclipse-maven-blender-r-fiji-runtime-nosamples-20260604-2039`
 - Digest: `sha256:3a13c9a0b62395e80053f3a8f956105df3d84115e5c0653515daa15d178673d5`
+- Local image ID: `sha256:1a54230c6e12ac6f40c2d5af3a1e03dd0cd5ac812fb496b55dbadd2dea0f79d1`
+- Local image size: Docker 显示约 `13GB`。
 
 已验证：
 
@@ -262,4 +281,3 @@ Fiji/ImageJ 的无合成样本 runtime 已单独构建并在 AGS 沙箱中验证
 - 在新加坡地域重测下载敏感 env：`snap_env`、`geogebra_env`、Fiji 下载依赖任务、AstroImageJ 下载任务、RStudio 数据下载。
 - 对 `hec_ras_env`、`google_earth_env`、`bluemail_env`、`rstudio_env` 评估是否值得 bake 专用应用层。
 - 对 `twon_access_commander_env` 决定是否允许 OVA/VM 类任务进入当前 profile。
-
