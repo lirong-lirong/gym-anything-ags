@@ -107,6 +107,20 @@ _RUNNER_COMPATIBILITY: Dict[str, RunnerCompatibility] = {
             "EnvSpec.user_accounts is compatible as credential/config metadata, not as general-purpose account provisioning.",
         ],
     ),
+    "ags": RunnerCompatibility(
+        runner="ags",
+        display_name="AGSRunner",
+        live_recording=False,
+        screenshot_video_assembly=True,
+        checkpoint_caching=False,
+        savevm=False,
+        user_accounts_mode="preprovisioned_accounts",
+        notes=[
+            "Runs an AGS custom envd sandbox through E2B-compatible command and file APIs.",
+            "Skips pre_start because AGS images should be prebuilt with heavy dependencies.",
+            "Uploads declared EnvSpec mounts into the sandbox instead of bind-mounting host paths.",
+        ],
+    ),
     "avf": RunnerCompatibility(
         runner="avf",
         display_name="AVFRunner",
@@ -162,6 +176,7 @@ def infer_runner_key_from_name(name: str) -> Optional[str]:
         "avdnativerunner": "avd_native",
         "avfrunner": "avf",
         "apptainerdirectrunner": "apptainer",
+        "agsrunner": "ags",
         "localrunner": "local",
     }
     return aliases.get(normalized)

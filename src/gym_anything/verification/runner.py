@@ -134,7 +134,10 @@ class VerifierRunner:
         target = spec if isinstance(spec, str) else spec.get("program") or spec.get("target")
         if not target:
             return {"error": "no program specified", "passed": False, "score": 0, "decided": False}
-        func = self._load_function(target, task_root, env_root)
+        try:
+            func = self._load_function(target, task_root, env_root)
+        except Exception as e:
+            return {"error": f"verifier load error: {e}", "passed": False, "score": 0, "decided": True}
         traj = self._load_traj(episode_dir)
         env_info = {"env_id": env_spec.id, "episode_dir": str(episode_dir)}
         

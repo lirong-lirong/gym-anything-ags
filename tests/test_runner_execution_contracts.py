@@ -23,6 +23,7 @@ RUNNER_PROFILES: dict[str, RunnerProfile] = {
     "qemu": "desktop_linux",
     "qemu_native": "desktop_linux",
     "apptainer": "desktop_linux",
+    "ags": "desktop_linux",
     "avf": "desktop_linux",
     "avd": "android",
     "avd_native": "android",
@@ -69,6 +70,10 @@ def _runner_class_for(runner_key: str):
         from gym_anything.runtime.runners.apptainer_direct import ApptainerDirectRunner
 
         return ApptainerDirectRunner
+    if runner_key == "ags":
+        from gym_anything.runtime.runners.ags import AGSRunner
+
+        return AGSRunner
     if runner_key == "avf":
         from gym_anything.runtime.runners.avf import AVFRunner
 

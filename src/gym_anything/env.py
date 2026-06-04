@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shlex
 import time
 from dataclasses import asdict
 from pathlib import Path
@@ -79,6 +80,7 @@ class GymAnythingEnv:
         - GYM_ANYTHING_RUNNER=qemu : Use QEMU runner (auto-selects native on macOS)
         - GYM_ANYTHING_RUNNER=qemu_native : Force QemuNativeRunner
         - GYM_ANYTHING_RUNNER=apptainer : Use ApptainerDirectRunner (GPU-enabled, no QEMU)
+        - GYM_ANYTHING_RUNNER=ags : Use AGSRunner through E2B/envd command/file APIs
         - GYM_ANYTHING_RUNNER=docker : Use DockerRunner (explicit)
         - Default: Auto-detect based on spec.runner field, then Docker, fallback to QEMU
 
@@ -119,6 +121,11 @@ class GymAnythingEnv:
             return self._make_qemu_runner(spec)
 
         # --- Explicit simple runners ---
+        if runner_override == "ags" or spec_runner == "ags":
+            from .runtime.runners.ags import AGSRunner
+            logger.info("Using AGSRunner")
+            return AGSRunner(spec)
+
         if runner_override == "local" or spec_runner == "local":
             logger.info("Using LocalRunner")
             return LocalRunner(spec)
@@ -267,6 +274,17 @@ class GymAnythingEnv:
             ssh_user=getattr(self._runner, "_ssh_user", None),
             ssh_password=getattr(self._runner, "_ssh_password", None),
         )
+
+    def _linux_hook_script(self, hook_cmd: str, log_path: Optional[str] = None) -> str:
+        exports = []
+        for name in ("GYM_ANYTHING_FAST_POST_START",):
+            value = os.environ.get(name)
+            if value is not None:
+                exports.append(f"export {name}={shlex.quote(value)};")
+        script = " ".join(exports + [f"{{ {hook_cmd}; }}"])
+        if log_path:
+            script = f"{script} > {shlex.quote(log_path)} 2>&1"
+        return script
 
     # Public API
     def reset(self, seed: Optional[int] = None, use_cache: bool = False,
@@ -449,7 +467,7 @@ class GymAnythingEnv:
 
         # === PRE_START HOOK ===
         # Skip if checkpoint_loaded and checkpoint was at pre_start or later
-        if loaded_level_num < level_order["pre_start"]:
+        if loaded_level_num < level_order["pre_start"] and not getattr(self._runner, "skip_pre_start", False):
             if getattr(self.env_spec, "hooks", None) and self.env_spec.hooks.get("pre_start"):
                 if self._reporter:
                     self._reporter.stage_start("pre_start_hook")
@@ -464,7 +482,8 @@ class GymAnythingEnv:
                     elif self._platform_family() == "windows":
                         self._runner.exec(hook_cmd)
                     else:
-                        self._runner.exec(f"bash -lc {hook_cmd} > /home/ga/env_setup_pre_start.log 2>&1", timeout=1800)
+                        hook_script = self._linux_hook_script(hook_cmd, "/home/ga/env_setup_pre_start.log")
+                        self._runner.exec(f"bash -lc {shlex.quote(hook_script)}", timeout=1800)
                     if self._reporter:
                         self._reporter.stage_done("pre_start_hook")
                 except Exception as e:
@@ -505,7 +524,8 @@ class GymAnythingEnv:
                     elif self._platform_family() == "windows":
                         self._runner.exec(hook_cmd)
                     else:
-                        self._runner.exec(f"bash -lc {hook_cmd} > /home/ga/env_setup_post_start.log 2>&1", timeout=1800)
+                        hook_script = self._linux_hook_script(hook_cmd, "/home/ga/env_setup_post_start.log")
+                        self._runner.exec(f"bash -lc {shlex.quote(hook_script)}", timeout=1800)
                     if self._reporter:
                         self._reporter.stage_done("post_start_hook")
                 except Exception as e:
@@ -532,7 +552,8 @@ class GymAnythingEnv:
                 if self._platform_family() == "windows":
                     self._runner.exec(hook_cmd)
                 else:
-                    self._runner.exec(f"bash -lc {hook_cmd}")
+                    hook_script = self._linux_hook_script(hook_cmd)
+                    self._runner.exec(f"bash -lc {shlex.quote(hook_script)}")
             except Exception:
                 pass
 
@@ -555,7 +576,8 @@ class GymAnythingEnv:
                     else:
                         # Use configurable timeout for pre_task hook (default 600s, can be overridden in task.json)
                         hook_timeout = self.task_spec.hooks.pre_task_timeout if self.task_spec.hooks else 600
-                        self._runner.exec(f"bash -lc {hook_cmd} > /home/ga/task_pre_task.log 2>&1", use_pty=False, timeout=hook_timeout)
+                        hook_script = self._linux_hook_script(hook_cmd, "/home/ga/task_pre_task.log")
+                        self._runner.exec(f"bash -lc {shlex.quote(hook_script)}", use_pty=False, timeout=hook_timeout)
                     self._capture_observation()
                     if self._reporter:
                         self._reporter.stage_done("pre_task_hook")
@@ -897,7 +919,8 @@ class GymAnythingEnv:
             elif self._platform_family() == "windows":
                 self._runner.exec(hook_cmd)
             else:
-                self._runner.exec(f"bash -lc {hook_cmd} > /home/ga/task_post_task.log 2>&1")
+                hook_script = self._linux_hook_script(hook_cmd, "/home/ga/task_post_task.log")
+                self._runner.exec(f"bash -lc {shlex.quote(hook_script)}")
         except Exception:
             pass
 
@@ -1194,6 +1217,9 @@ class GymAnythingEnv:
     def set_roots(self, env_root: Optional[os.PathLike], task_root: Optional[os.PathLike]) -> None:
         self._env_root = Path(env_root) if env_root else None
         self._task_root = Path(task_root) if task_root else None
+        set_roots = getattr(self._runner, "set_roots", None)
+        if callable(set_roots):
+            set_roots(self._env_root, self._task_root)
 
     # Controls & helpers (M4)
     def pause_recording(self) -> None:

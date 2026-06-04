@@ -160,6 +160,19 @@ def _collect_runner_checks(runner: Optional[str]) -> List[DoctorCheck]:
         checks.append(_check_binary("emulator", "emulator", probe=["emulator", "-version"]))
     if target in {"all", "apptainer", "qemu", "avd"}:
         checks.append(_check_binary("ffmpeg", "ffmpeg", probe=["ffmpeg", "-version"], required=False))
+    if target in {"all", "ags"}:
+        checks.append(DoctorCheck(
+            name="e2b_python",
+            ok=__import__("importlib.util").util.find_spec("e2b") is not None,
+            detail="e2b Python package importable",
+            required=True,
+        ))
+        checks.append(DoctorCheck(
+            name="ags_e2b_env",
+            ok=bool(os.environ.get("E2B_API_KEY") and os.environ.get("E2B_DOMAIN")),
+            detail="E2B_API_KEY and E2B_DOMAIN are set" if os.environ.get("E2B_API_KEY") and os.environ.get("E2B_DOMAIN") else "set E2B_API_KEY and E2B_DOMAIN",
+            required=True,
+        ))
     if target == "local":
         checks.append(DoctorCheck(name="local_runner", ok=True, detail="LocalRunner has no external system prerequisites"))
 
@@ -314,6 +327,7 @@ _RUNNER_DEPS: Dict[str, List[str]] = {
     "avd": ["apptainer"],
     "avd_native": ["adb"],
     "apptainer": ["apptainer"],
+    "ags": [],
     "local": [],
 }
 
@@ -340,6 +354,27 @@ def get_runner_status() -> Dict[str, Dict]:
 
     results = {}
     for runner_key, deps in _RUNNER_DEPS.items():
+        if runner_key == "ags":
+            e2b_importable = __import__("importlib.util").util.find_spec("e2b") is not None
+            env_ready = bool(os.environ.get("E2B_API_KEY") and os.environ.get("E2B_DOMAIN"))
+            results[runner_key] = {
+                "available": e2b_importable and env_ready,
+                "deps": {
+                    "e2b-python": {
+                        "installed": e2b_importable,
+                        "path": "importable" if e2b_importable else None,
+                        "desc": "E2B Python SDK",
+                        "install": "pip install e2b",
+                    },
+                    "E2B_API_KEY/E2B_DOMAIN": {
+                        "installed": env_ready,
+                        "path": "environment" if env_ready else None,
+                        "desc": "AGS E2B-compatible API credentials and domain",
+                        "install": "export E2B_API_KEY=... E2B_DOMAIN=ap-guangzhou.tencentags.com",
+                    },
+                },
+            }
+            continue
         # Platform check
         if runner_key == "avf" and not _IS_MACOS:
             results[runner_key] = {"available": False, "reason": "macOS only", "deps": {}}
