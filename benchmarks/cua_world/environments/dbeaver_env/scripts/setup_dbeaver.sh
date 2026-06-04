@@ -73,6 +73,14 @@ touch /home/ga/.local/share/DBeaverData/.metadata
 # Set ownership
 chown -R ga:ga /home/ga/.local
 
+# In training/smoke runs, avoid per-rollout GUI warm-up. The required database,
+# launchers, and workspace directories have already been prepared above.
+if [ "${GYM_ANYTHING_FAST_POST_START:-0}" = "1" ]; then
+    echo "GYM_ANYTHING_FAST_POST_START=1: skipping DBeaver GUI warm-up launch"
+    echo "=== DBeaver Setup Complete (fast post_start) ==="
+    exit 0
+fi
+
 # Start DBeaver for the ga user
 echo "Launching DBeaver..."
 su - ga -c "DISPLAY=:1 /usr/share/dbeaver-ce/dbeaver > /tmp/dbeaver.log 2>&1 &"

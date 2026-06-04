@@ -23,10 +23,8 @@ rm -f "$SCRIPTS_DIR/sync_prod_to_staging.sql"
 # 1. Download Base Northwind Database
 BASE_DB="/tmp/northwind_base.db"
 if [ ! -f "$BASE_DB" ]; then
-    echo "Downloading base Northwind database..."
-    wget -q --timeout=60 "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/main/Northwind_large.sql" -O /tmp/nw.sql
-    sqlite3 "$BASE_DB" < /tmp/nw.sql
-    rm -f /tmp/nw.sql
+    echo "Provisioning base Northwind database..."
+    ensure_northwind_db "$BASE_DB"
 fi
 
 # 2. Create Production DB (Clean Copy)
@@ -41,30 +39,30 @@ cp "$BASE_DB" "$DB_DIR/northwind_staging.db"
 echo "Applying changes to Staging DB..."
 sqlite3 "$DB_DIR/northwind_staging.db" <<EOF
 -- Product INSERTs (3 rows)
-INSERT INTO Product (Id, ProductName, SupplierId, CategoryId, UnitPrice, Discontinued) VALUES (78, 'Organic Honey Spread', 1, 2, 28.50, 0);
-INSERT INTO Product (Id, ProductName, SupplierId, CategoryId, UnitPrice, Discontinued) VALUES (79, 'Artisan Rye Bread', 2, 5, 12.75, 0);
-INSERT INTO Product (Id, ProductName, SupplierId, CategoryId, UnitPrice, Discontinued) VALUES (80, 'Highland Spring Water', 3, 1, 4.50, 0);
+INSERT INTO Products (ProductID, ProductName, SupplierID, CategoryID, UnitPrice, Discontinued) VALUES (78, 'Organic Honey Spread', 1, 2, 28.50, '0');
+INSERT INTO Products (ProductID, ProductName, SupplierID, CategoryID, UnitPrice, Discontinued) VALUES (79, 'Artisan Rye Bread', 2, 5, 12.75, '0');
+INSERT INTO Products (ProductID, ProductName, SupplierID, CategoryID, UnitPrice, Discontinued) VALUES (80, 'Highland Spring Water', 3, 1, 4.50, '0');
 
 -- Product UnitPrice UPDATEs (5 rows)
-UPDATE Product SET UnitPrice = 19.50 WHERE Id = 1;  -- Was 18.00
-UPDATE Product SET UnitPrice = 21.00 WHERE Id = 2;  -- Was 19.00
-UPDATE Product SET UnitPrice = 5.25 WHERE Id = 24;  -- Was 4.50
-UPDATE Product SET UnitPrice = 275.00 WHERE Id = 38; -- Was 263.50
-UPDATE Product SET UnitPrice = 49.99 WHERE Id = 43;  -- Was 46.00
+UPDATE Products SET UnitPrice = 19.50 WHERE ProductID = 1;  -- Was 18.00
+UPDATE Products SET UnitPrice = 21.00 WHERE ProductID = 2;  -- Was 19.00
+UPDATE Products SET UnitPrice = 5.25 WHERE ProductID = 24;  -- Was 4.50
+UPDATE Products SET UnitPrice = 275.00 WHERE ProductID = 38; -- Was 263.50
+UPDATE Products SET UnitPrice = 49.99 WHERE ProductID = 43;  -- Was 46.00
 
 -- Customer DELETEs (2 rows)
-DELETE FROM Customer WHERE Id = 'CENTC';
-DELETE FROM Customer WHERE Id = 'FISSA';
+DELETE FROM Customers WHERE CustomerID = 'CENTC';
+DELETE FROM Customers WHERE CustomerID = 'FISSA';
 
 -- Category INSERT (1 row)
-INSERT INTO Category (Id, CategoryName, Description) VALUES (9, 'Organic', 'Certified organic food products');
+INSERT INTO Categories (CategoryID, CategoryName, Description) VALUES (9, 'Organic', 'Certified organic food products');
 
 -- OrderDetail Quantity UPDATEs (4 rows)
 -- Note: OrderDetail PK is composite, usually handled via rowid or explicit match in WHERE
-UPDATE OrderDetail SET Quantity = 15 WHERE OrderId = 10248 AND ProductId = 11; -- Was 12
-UPDATE OrderDetail SET Quantity = 8 WHERE OrderId = 10248 AND ProductId = 42;  -- Was 10
-UPDATE OrderDetail SET Quantity = 12 WHERE OrderId = 10249 AND ProductId = 14;  -- Was 9
-UPDATE OrderDetail SET Quantity = 35 WHERE OrderId = 10249 AND ProductId = 51;  -- Was 40
+UPDATE "Order Details" SET Quantity = 15 WHERE OrderID = 10248 AND ProductID = 11; -- Was 12
+UPDATE "Order Details" SET Quantity = 8 WHERE OrderID = 10248 AND ProductID = 42;  -- Was 10
+UPDATE "Order Details" SET Quantity = 12 WHERE OrderID = 10249 AND ProductID = 14;  -- Was 9
+UPDATE "Order Details" SET Quantity = 35 WHERE OrderID = 10249 AND ProductID = 51;  -- Was 40
 EOF
 
 # Set permissions

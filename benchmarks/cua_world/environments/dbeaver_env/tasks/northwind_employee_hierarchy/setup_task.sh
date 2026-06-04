@@ -22,21 +22,8 @@ rm -f "$SCRIPTS_DIR/hierarchy_analysis.sql"
 
 # Ensure Northwind database exists and is populated
 if [ ! -f "$DB_PATH" ] || [ "$(stat -c%s "$DB_PATH" 2>/dev/null || echo 0)" -lt 10000 ]; then
-    echo "Downloading Northwind database..."
-    wget -q --timeout=60 "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/main/Northwind_large.sql" \
-        -O /tmp/northwind.sql 2>/dev/null || \
-    wget -q --timeout=60 "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/refs/heads/main/Northwind_large.sql" \
-        -O /tmp/northwind.sql 2>/dev/null
-    
-    if [ -s /tmp/northwind.sql ]; then
-        sqlite3 "$DB_PATH" < /tmp/northwind.sql
-        rm -f /tmp/northwind.sql
-        chown ga:ga "$DB_PATH"
-        echo "Database created."
-    else
-        echo "ERROR: Failed to download Northwind SQL."
-        exit 1
-    fi
+    echo "Provisioning Northwind database..."
+    ensure_northwind_db "$DB_PATH"
 fi
 
 # Verify Employees table exists and has recursive structure

@@ -36,16 +36,8 @@ chown ga:ga "$CHINOOK_DB"
 # 3. Ensure Northwind database exists
 NORTHWIND_DB="$DB_DIR/northwind.db"
 if [ ! -f "$NORTHWIND_DB" ] || [ "$(stat -c%s "$NORTHWIND_DB" 2>/dev/null || echo 0)" -lt 10000 ]; then
-    echo "Downloading Northwind database..."
-    # Download SQL dump and create DB
-    wget -q -O /tmp/northwind.sql "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/main/Northwind_large.sql"
-    if [ -s /tmp/northwind.sql ]; then
-        sqlite3 "$NORTHWIND_DB" < /tmp/northwind.sql
-        rm /tmp/northwind.sql
-    else
-        echo "Failed to download Northwind SQL"
-        exit 1
-    fi
+    echo "Provisioning Northwind database..."
+    ensure_northwind_db "$NORTHWIND_DB"
 fi
 chmod 644 "$NORTHWIND_DB"
 chown ga:ga "$NORTHWIND_DB"
@@ -53,7 +45,7 @@ chown ga:ga "$NORTHWIND_DB"
 # 4. Verify Source Data Integrity (Basic Checks)
 echo "Verifying source data..."
 CHINOOK_CUST_COUNT=$(sqlite3 "$CHINOOK_DB" "SELECT COUNT(*) FROM customers;")
-NORTHWIND_CUST_COUNT=$(sqlite3 "$NORTHWIND_DB" "SELECT COUNT(*) FROM Customer;")  # Singular 'Customer' in Northwind
+NORTHWIND_CUST_COUNT=$(sqlite3 "$NORTHWIND_DB" "SELECT COUNT(*) FROM Customers;")
 echo "Chinook Customers: $CHINOOK_CUST_COUNT"
 echo "Northwind Customers: $NORTHWIND_CUST_COUNT"
 

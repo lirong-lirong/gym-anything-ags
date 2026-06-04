@@ -41,7 +41,7 @@ echo "Calculating ground truth..."
 GROUND_TRUTH_SQL="
 WITH AlbumSizes AS (
     SELECT AlbumId, COUNT(TrackId) as TotalTracks
-    FROM Tracks
+    FROM tracks
     GROUP BY AlbumId
 ),
 InvoicePurchases AS (
@@ -50,8 +50,8 @@ InvoicePurchases AS (
         t.AlbumId,
         COUNT(DISTINCT ii.TrackId) as PurchasedTracks,
         SUM(ii.UnitPrice * ii.Quantity) as PurchaseValue
-    FROM InvoiceItems ii
-    JOIN Tracks t ON ii.TrackId = t.TrackId
+    FROM invoice_items ii
+    JOIN tracks t ON ii.TrackId = t.TrackId
     GROUP BY ii.InvoiceId, t.AlbumId
 )
 SELECT 

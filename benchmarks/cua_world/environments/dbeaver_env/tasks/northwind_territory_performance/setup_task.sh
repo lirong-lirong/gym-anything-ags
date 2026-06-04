@@ -22,34 +22,8 @@ rm -f "$SCRIPTS_DIR/territory_analysis.sql"
 
 # Download Northwind database if not present
 if [ ! -f "$NORTHWIND_DB" ] || [ "$(stat -c%s "$NORTHWIND_DB" 2>/dev/null || echo 0)" -lt 10000 ]; then
-    echo "Downloading Northwind database..."
-
-    # Try downloading the pre-built SQLite binary directly
-    NORTHWIND_DOWNLOADED=false
-
-    # Primary: try the large SQL file and create SQLite from it
-    if wget -q --timeout=60 "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/main/Northwind_large.sql" \
-        -O /tmp/northwind_large.sql 2>/dev/null && [ -s /tmp/northwind_large.sql ]; then
-        echo "Downloaded Northwind SQL. Creating SQLite database..."
-        sqlite3 "$NORTHWIND_DB" < /tmp/northwind_large.sql && NORTHWIND_DOWNLOADED=true
-        rm -f /tmp/northwind_large.sql
-    fi
-
-    # Fallback: try alternate raw URL
-    if [ "$NORTHWIND_DOWNLOADED" = "false" ]; then
-        echo "Trying alternate Northwind source..."
-        wget -q --timeout=60 "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/refs/heads/main/Northwind_large.sql" \
-            -O /tmp/northwind_large.sql 2>/dev/null && \
-        sqlite3 "$NORTHWIND_DB" < /tmp/northwind_large.sql && NORTHWIND_DOWNLOADED=true
-        rm -f /tmp/northwind_large.sql
-    fi
-
-    if [ "$NORTHWIND_DOWNLOADED" = "false" ] || [ ! -f "$NORTHWIND_DB" ] || [ "$(stat -c%s "$NORTHWIND_DB" 2>/dev/null || echo 0)" -lt 10000 ]; then
-        echo "ERROR: Failed to download Northwind database"
-        exit 1
-    fi
-
-    chown ga:ga "$NORTHWIND_DB"
+    echo "Provisioning Northwind database..."
+    ensure_northwind_db "$NORTHWIND_DB"
     echo "Northwind database created at $NORTHWIND_DB"
 else
     echo "Northwind database already present"
@@ -130,7 +104,7 @@ FROM Orders o
 JOIN Employees e ON o.EmployeeID = e.EmployeeID
 JOIN "{empterr_table}" et ON e.EmployeeID = et.EmployeeID
 JOIN Territories t ON et.TerritoryID = t.TerritoryID
-JOIN Region r ON t.RegionID = r.RegionID
+JOIN Regions r ON t.RegionID = r.RegionID
 JOIN "{orderdetails_table}" od ON o.OrderID = od.OrderID
 GROUP BY t.TerritoryID
 ORDER BY TotalRevenue DESC

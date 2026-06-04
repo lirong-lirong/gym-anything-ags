@@ -41,15 +41,15 @@ SELECT
     'Rock' as genre,
     SUM(CASE WHEN strftime('%Y', i.InvoiceDate) = '2009' THEN il.UnitPrice * il.Quantity ELSE 0 END) as rev_2009,
     SUM(il.UnitPrice * il.Quantity) as total_revenue
-FROM Genre g
-JOIN Track t ON g.GenreId = t.GenreId
-JOIN InvoiceLine il ON t.TrackId = il.TrackId
-JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+FROM genres g
+JOIN tracks t ON g.GenreId = t.GenreId
+JOIN invoice_items il ON t.TrackId = il.TrackId
+JOIN invoices i ON il.InvoiceId = i.InvoiceId
 WHERE g.Name = 'Rock';
 EOF
 
 # Determine distinct genre count for row count verification
-GENRE_COUNT=$(sqlite3 "$CHINOOK_WORK" "SELECT COUNT(DISTINCT g.GenreId) FROM Genre g JOIN Track t ON g.GenreId = t.GenreId JOIN InvoiceLine il ON t.TrackId = il.TrackId;")
+GENRE_COUNT=$(sqlite3 "$CHINOOK_WORK" "SELECT COUNT(DISTINCT g.GenreId) FROM genres g JOIN tracks t ON g.GenreId = t.GenreId JOIN invoice_items il ON t.TrackId = il.TrackId;")
 echo "$GENRE_COUNT" > /tmp/ground_truth_genre_count.txt
 
 echo "Ground truth calculated. Genre count: $GENRE_COUNT"

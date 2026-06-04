@@ -49,6 +49,36 @@ get_file_size() {
     fi
 }
 
+# Function to provision the Northwind SQLite database.
+ensure_northwind_db() {
+    local target_path="${1:-/home/ga/Documents/databases/northwind.db}"
+    mkdir -p "$(dirname "$target_path")"
+
+    if [ -f "$target_path" ] && [ "$(get_file_size "$target_path")" -ge 10000 ]; then
+        return 0
+    fi
+
+    if [ -f "/workspace/data/northwind.db" ] && [ "$(get_file_size /workspace/data/northwind.db)" -ge 10000 ]; then
+        cp /workspace/data/northwind.db "$target_path"
+        chmod 644 "$target_path"
+        chown ga:ga "$target_path" 2>/dev/null || true
+        return 0
+    fi
+
+    echo "Northwind fixture missing from /workspace/data; downloading direct SQLite DB..."
+    if wget -q --timeout=120 -O "$target_path" "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/main/dist/northwind.db" ||
+       curl -L --max-time 120 -o "$target_path" "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/main/dist/northwind.db"; then
+        if [ "$(get_file_size "$target_path")" -ge 10000 ]; then
+            chmod 644 "$target_path"
+            chown ga:ga "$target_path" 2>/dev/null || true
+            return 0
+        fi
+    fi
+
+    echo "ERROR: Failed to provision Northwind database at $target_path"
+    return 1
+}
+
 # Function to take screenshot
 take_screenshot() {
     local path="${1:-/tmp/screenshot.png}"
@@ -84,7 +114,28 @@ focus_dbeaver() {
         DISPLAY=:1 wmctrl -ia "$wid" 2>/dev/null || true
         return 0
     fi
-    return 1
+    echo "WARNING: DBeaver window not found; continuing without focusing"
+    return 0
+}
+
+# Function to maximize a window by title. Best-effort so setup scripts do not
+# fail when the desktop/window manager is slow or the window is absent.
+maximize_window() {
+    local title="${1:-:ACTIVE:}"
+    if [ "$title" = ":ACTIVE:" ]; then
+        DISPLAY=:1 wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null || true
+        return 0
+    fi
+
+    local wid
+    wid=$(DISPLAY=:1 wmctrl -l 2>/dev/null | grep -i "$title" | head -1 | awk '{print $1}')
+    if [ -n "$wid" ]; then
+        DISPLAY=:1 wmctrl -ia "$wid" 2>/dev/null || true
+        DISPLAY=:1 wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null || true
+    else
+        echo "WARNING: window '$title' not found; continuing without maximizing"
+    fi
+    return 0
 }
 
 # Function to check if database connection exists in DBeaver

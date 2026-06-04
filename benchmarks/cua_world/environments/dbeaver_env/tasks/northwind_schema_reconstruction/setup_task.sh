@@ -22,25 +22,10 @@ rm -f /home/ga/Documents/exports/restoration_check.csv
 # 1. Prepare Source Data (Real Northwind DB)
 # We download the standard Northwind SQLite DB to a temp location to generate the CSV
 echo "Acquiring Northwind data..."
-WGET_URL="https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/main/Northwind_large.sql"
-TEMP_SQL="/tmp/northwind_source.sql"
 TEMP_DB="/tmp/northwind_source.db"
 
-# Download SQL dump if not present
-if [ ! -f "$TEMP_SQL" ]; then
-    wget -q -O "$TEMP_SQL" "$WGET_URL" || \
-    curl -L -o "$TEMP_SQL" "$WGET_URL"
-fi
-
-# Create temp DB
 rm -f "$TEMP_DB"
-if [ -f "$TEMP_SQL" ]; then
-    echo "Creating temporary source database..."
-    sqlite3 "$TEMP_DB" < "$TEMP_SQL"
-else
-    echo "ERROR: Failed to download Northwind source."
-    exit 1
-fi
+ensure_northwind_db "$TEMP_DB"
 
 # 2. Generate the "Legacy Sales Dump" CSV
 # We flatten Orders, Customers, Products, and OrderDetails
@@ -99,7 +84,7 @@ fi
 echo "$LINE_COUNT" > /tmp/ground_truth_csv_lines.txt
 
 # Clean up source DB (Agent shouldn't use it directly)
-rm -f "$TEMP_DB" "$TEMP_SQL"
+rm -f "$TEMP_DB"
 
 # 3. Setup DBeaver
 if ! pgrep -f "dbeaver" > /dev/null; then

@@ -17,15 +17,8 @@ chown -R ga:ga /home/ga/Documents
 # Download Northwind DB if missing
 NW_DB="$DB_DIR/northwind.db"
 if [ ! -f "$NW_DB" ] || [ "$(stat -c%s "$NW_DB" 2>/dev/null || echo 0)" -lt 10000 ]; then
-    echo "Downloading Northwind database..."
-    wget -q -O "$NW_DB" "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/refs/heads/main/dist/northwind.db" || \
-    wget -q -O "$NW_DB" "https://github.com/jpwhite3/northwind-SQLite-3/blob/main/dist/northwind.db?raw=true"
-    
-    if [ ! -f "$NW_DB" ]; then
-        echo "Failed to download database. Creating basic schema for fallback..."
-        sqlite3 "$NW_DB" "CREATE TABLE Shippers(ShipperID INTEGER PRIMARY KEY, CompanyName TEXT);"
-        sqlite3 "$NW_DB" "CREATE TABLE Orders(OrderID INTEGER PRIMARY KEY, ShipVia INTEGER, Freight REAL, ShipCountry TEXT, ShippedDate TEXT);"
-    fi
+    echo "Provisioning Northwind database..."
+    ensure_northwind_db "$NW_DB"
 fi
 chmod 644 "$NW_DB"
 chown ga:ga "$NW_DB"

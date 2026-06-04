@@ -55,18 +55,25 @@ GROUP BY c.CustomerId;
 
 # 2. Calculate expected Summary Report data
 sqlite3 -header -csv "$CHINOOK_DST" "
+WITH customer_spend AS (
+    SELECT
+        c.CustomerId,
+        COALESCE(SUM(i.Total), 0) as TotalSpend
+    FROM customers c
+    LEFT JOIN invoices i ON c.CustomerId = i.CustomerId
+    GROUP BY c.CustomerId
+)
 SELECT
     CASE 
-        WHEN COALESCE(SUM(i.Total), 0) >= 45.0 THEN 'Gold'
-        WHEN COALESCE(SUM(i.Total), 0) >= 38.0 THEN 'Silver'
-        WHEN COALESCE(SUM(i.Total), 0) >= 30.0 THEN 'Bronze'
+        WHEN TotalSpend >= 45.0 THEN 'Gold'
+        WHEN TotalSpend >= 38.0 THEN 'Silver'
+        WHEN TotalSpend >= 30.0 THEN 'Bronze'
         ELSE 'None'
     END as LoyaltyTier,
-    COUNT(DISTINCT c.CustomerId) as CustomerCount,
-    TOTAL(i.Total) as TotalRevenue
-FROM customers c
-LEFT JOIN invoices i ON c.CustomerId = i.CustomerId
-GROUP BY 1;
+    COUNT(*) as CustomerCount,
+    TOTAL(TotalSpend) as TotalRevenue
+FROM customer_spend
+GROUP BY LoyaltyTier;
 " > /tmp/gt_summary.csv
 
 # 3. Calculate expected reward row count (Customers with tier != None)

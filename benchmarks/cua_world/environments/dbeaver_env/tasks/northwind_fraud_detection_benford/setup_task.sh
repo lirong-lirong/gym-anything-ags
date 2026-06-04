@@ -16,10 +16,8 @@ NORTHWIND_DB="/home/ga/Documents/databases/northwind.db"
 
 # Ensure Northwind database exists
 if [ ! -f "$NORTHWIND_DB" ] || [ "$(get_file_size "$NORTHWIND_DB")" -lt 10000 ]; then
-    echo "Downloading Northwind database..."
-    wget -q -O /tmp/northwind.sql "https://raw.githubusercontent.com/jpwhite3/northwind-SQLite3/main/Northwind_large.sql"
-    sqlite3 "$NORTHWIND_DB" < /tmp/northwind.sql
-    rm -f /tmp/northwind.sql
+    echo "Provisioning Northwind database..."
+    ensure_northwind_db "$NORTHWIND_DB"
 fi
 
 # Set permissions
@@ -38,7 +36,7 @@ c = conn.cursor()
 
 # Find the OrderDetails table (handling case sensitivity)
 tables = [row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
-od_table = next((t for t in tables if t.lower().replace('_', '') == 'orderdetails'), None)
+od_table = next((t for t in tables if t.lower().replace('_', '').replace(' ', '') == 'orderdetails'), None)
 
 if not od_table:
     print("Error: OrderDetails table not found")
