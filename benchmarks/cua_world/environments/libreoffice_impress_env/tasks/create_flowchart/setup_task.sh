@@ -16,7 +16,12 @@ rm -rf /tmp/lu*/ 2>/dev/null || true
 rm -f /tmp/.~lock.* 2>/dev/null || true
 
 # Copy the blank flowchart template (has a title for context)
-cp /workspace/assets/flowchart_blank.odp /home/ga/Documents/Presentations/flowchart_test.odp
+if [ -f /workspace/assets/flowchart_blank.odp ]; then
+    cp /workspace/assets/flowchart_blank.odp /home/ga/Documents/Presentations/flowchart_test.odp
+else
+    echo "WARNING: /workspace/assets/flowchart_blank.odp missing; generating fallback presentation"
+    create_basic_impress_odp /home/ga/Documents/Presentations/flowchart_test.odp flowchart
+fi
 chown ga:ga /home/ga/Documents/Presentations/flowchart_test.odp
 
 echo "Copied flowchart template with 1 titled slide"

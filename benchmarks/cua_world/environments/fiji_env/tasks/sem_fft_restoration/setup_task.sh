@@ -44,14 +44,18 @@ output_noisy = "/home/ga/Fiji_Data/raw/sem_noise/alloy_noisy.tif"
 output_clean = "/var/lib/fiji/ground_truth/alloy_clean.tif"
 
 try:
-    # Load base image
-    if os.path.exists(base_image_path):
-        img = Image.open(base_image_path).convert('L')
-        img = img.resize((width, height))
-        arr = np.array(img).astype(float)
-    else:
+    # Load base image. Failed wget calls can leave an empty or invalid file,
+    # so invalid local files must fall back to generated structure too.
+    try:
+        if os.path.exists(base_image_path) and os.path.getsize(base_image_path) > 0:
+            img = Image.open(base_image_path).convert('L')
+            img = img.resize((width, height))
+            arr = np.array(img).astype(float)
+        else:
+            raise OSError("base image missing or empty")
+    except Exception as load_error:
         # Synthetic structure if download failed
-        print("Using synthetic structure")
+        print(f"Using synthetic structure: {load_error}")
         x, y = np.meshgrid(np.arange(width), np.arange(height))
         arr = np.sin(x/5.0) * np.cos(y/5.0) * 128 + 128
         

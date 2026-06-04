@@ -15,7 +15,7 @@ from odf.draw import Page
 doc = OpenDocumentPresentation()
 
 for i in range(3):
-    page = Page(name=f"Slide{i+1}")
+    page = Page(name=f"Slide{i+1}", masterpagename="Default")
     doc.presentation.addElement(page)
 
 doc.save("/home/ga/Documents/Presentations/export_test.odp")

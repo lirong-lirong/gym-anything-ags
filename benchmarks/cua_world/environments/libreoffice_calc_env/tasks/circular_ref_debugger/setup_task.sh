@@ -32,7 +32,7 @@ doc.styles.addElement(currency_style)
 
 # Create cell style for currency
 currency_cell_style = Style(name="CurrencyCell", family="table-cell")
-currency_cell_style.addAttribute("datastylename", "Currency1")
+currency_cell_style.setAttribute("datastylename", "Currency1")
 doc.styles.addElement(currency_cell_style)
 
 # Add a sheet

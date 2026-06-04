@@ -273,7 +273,7 @@ chown -R ga:ga "$PROJECT_DIR"
 # Compile and capture EXPECTED output (ground truth)
 echo "Generating ground truth output..."
 cd "$PROJECT_DIR"
-JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 javac -d bin -sourcepath src src/com/example/commands/Main.java
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 javac -d bin -sourcepath src $(find src -name '*.java' -print)
 JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 java -cp bin com.example.commands.Main > /tmp/expected_output.txt 2>&1
 
 echo "Expected output:"

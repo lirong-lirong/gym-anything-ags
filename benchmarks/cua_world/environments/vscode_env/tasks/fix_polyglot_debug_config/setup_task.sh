@@ -16,11 +16,13 @@ sudo -u ga mkdir -p "$WORKSPACE_DIR/data"
 
 # Install Redis server and Node/Python dependencies
 echo "Installing dependencies..."
-apt-get update -qq && apt-get install -y -qq redis-server > /dev/null
+if ! command -v redis-server >/dev/null 2>&1; then
+    apt-get update -qq && apt-get install -y -qq redis-server > /dev/null
+fi
 # Ensure redis is not running as a daemon so the agent's VS Code task can bind to port 6379
 systemctl stop redis-server 2>/dev/null || true  
 npm install -g redis sqlite3 > /dev/null 2>&1 || true
-pip3 install redis fastapi uvicorn > /dev/null 2>&1 || true
+pip3 install --break-system-packages redis fastapi uvicorn > /dev/null 2>&1 || true
 
 # 1. Generate Dataset
 cat > "$WORKSPACE_DIR/data/podcast_episodes.json" << 'EOF'

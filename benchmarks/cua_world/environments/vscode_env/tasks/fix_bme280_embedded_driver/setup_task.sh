@@ -316,7 +316,8 @@ EOF
 chown -R ga:ga "$WORKSPACE_DIR"
 
 # Launch VSCode
-pkill -f "code" 2>/dev/null || true
+pkill -u ga -x code 2>/dev/null || true
+pkill -u ga -f "/usr/share/code|/opt/visual-studio-code|code --" 2>/dev/null || true
 sleep 1
 su - ga -c "DISPLAY=:1 code $WORKSPACE_DIR/datasheet/BST-BME280-DS002_Excerpt.txt $WORKSPACE_DIR/src/bme280.c &"
 sleep 5

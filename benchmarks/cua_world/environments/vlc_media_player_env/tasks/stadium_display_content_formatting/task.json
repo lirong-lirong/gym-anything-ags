@@ -26,9 +26,9 @@
     "manifest_file": "/home/ga/Documents/deployment.json"
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_stadium_display_content_formatting"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

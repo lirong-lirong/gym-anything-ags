@@ -26,9 +26,9 @@
     "industry": "Motion Picture and Video Industries"
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_indie_film_adr_screener_prep"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

@@ -30,19 +30,23 @@ setup_user_weasis() {
     # Download sample DICOM from Rubo Medical (small public samples)
     SAMPLE_DIR="$home_dir/DICOM/samples"
 
-    # Download CT scan sample (compressed)
-    wget -q "https://www.rubomedical.com/dicom_files/dicom_viewer_0002.zip" -O /tmp/dicom_sample1.zip 2>/dev/null && {
-        unzip -q -o /tmp/dicom_sample1.zip -d "$SAMPLE_DIR/ct_scan/" 2>/dev/null || true
-        rm -f /tmp/dicom_sample1.zip
-        echo "  - Downloaded CT scan sample"
-    } || echo "  - Could not download CT scan sample"
+    if [ "${GYM_ANYTHING_FAST_POST_START:-0}" = "1" ]; then
+        echo "  - Fast post_start: skipping public DICOM downloads"
+    else
+        # Download CT scan sample (compressed)
+        wget -q --timeout=30 --tries=1 "https://www.rubomedical.com/dicom_files/dicom_viewer_0002.zip" -O /tmp/dicom_sample1.zip 2>/dev/null && {
+            unzip -q -o /tmp/dicom_sample1.zip -d "$SAMPLE_DIR/ct_scan/" 2>/dev/null || true
+            rm -f /tmp/dicom_sample1.zip
+            echo "  - Downloaded CT scan sample"
+        } || echo "  - Could not download CT scan sample"
 
-    # Download MR scan sample
-    wget -q "https://www.rubomedical.com/dicom_files/dicom_viewer_0003.zip" -O /tmp/dicom_sample2.zip 2>/dev/null && {
-        unzip -q -o /tmp/dicom_sample2.zip -d "$SAMPLE_DIR/mr_scan/" 2>/dev/null || true
-        rm -f /tmp/dicom_sample2.zip
-        echo "  - Downloaded MR scan sample"
-    } || echo "  - Could not download MR scan sample"
+        # Download MR scan sample
+        wget -q --timeout=30 --tries=1 "https://www.rubomedical.com/dicom_files/dicom_viewer_0003.zip" -O /tmp/dicom_sample2.zip 2>/dev/null && {
+            unzip -q -o /tmp/dicom_sample2.zip -d "$SAMPLE_DIR/mr_scan/" 2>/dev/null || true
+            rm -f /tmp/dicom_sample2.zip
+            echo "  - Downloaded MR scan sample"
+        } || echo "  - Could not download MR scan sample"
+    fi
 
     # If downloads failed, create synthetic DICOM files using pydicom
     if [ ! -d "$SAMPLE_DIR/ct_scan" ] || [ -z "$(ls -A $SAMPLE_DIR/ct_scan 2>/dev/null)" ]; then
@@ -138,6 +142,75 @@ except Exception as e:
 PYEOF
     fi
 
+    if [ ! -d "$SAMPLE_DIR/ct_scan" ] || [ -z "$(ls -A "$SAMPLE_DIR/ct_scan" 2>/dev/null)" ] || \
+       [ ! -d "$SAMPLE_DIR/mr_scan" ] || [ -z "$(ls -A "$SAMPLE_DIR/mr_scan" 2>/dev/null)" ]; then
+        echo "  - Creating smoke fallback CT/MR DICOM files..."
+        python3 << 'PYEOF'
+import os
+import numpy as np
+
+try:
+    from pydicom.dataset import Dataset, FileDataset
+    from pydicom.uid import generate_uid, ExplicitVRLittleEndian
+    import datetime
+
+    def create_sample_dicom(filename, modality="CT", size=256):
+        storage_uid = "1.2.840.10008.5.1.4.1.1.2" if modality == "CT" else "1.2.840.10008.5.1.4.1.1.4"
+        file_meta = Dataset()
+        file_meta.MediaStorageSOPClassUID = storage_uid
+        file_meta.MediaStorageSOPInstanceUID = generate_uid()
+        file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
+
+        ds = FileDataset(filename, {}, file_meta=file_meta, preamble=b"\0" * 128)
+        dt = datetime.datetime.now()
+        ds.ContentDate = dt.strftime("%Y%m%d")
+        ds.ContentTime = dt.strftime("%H%M%S.%f")
+        ds.StudyInstanceUID = generate_uid()
+        ds.SeriesInstanceUID = generate_uid()
+        ds.SOPInstanceUID = file_meta.MediaStorageSOPInstanceUID
+        ds.SOPClassUID = file_meta.MediaStorageSOPClassUID
+        ds.Modality = modality
+        ds.PatientName = f"Smoke^{modality}"
+        ds.PatientID = f"SMOKE{modality}"
+        ds.StudyDescription = f"Smoke fallback {modality} Study"
+        ds.SeriesDescription = f"Smoke fallback {modality} Series"
+        ds.SamplesPerPixel = 1
+        ds.PhotometricInterpretation = "MONOCHROME2"
+        ds.Rows = size
+        ds.Columns = size
+        ds.BitsAllocated = 16
+        ds.BitsStored = 12
+        ds.HighBit = 11
+        ds.PixelRepresentation = 0
+        ds.RescaleIntercept = -1024 if modality == "CT" else 0
+        ds.RescaleSlope = 1
+        ds.WindowCenter = 40
+        ds.WindowWidth = 400
+
+        image = np.zeros((size, size), dtype=np.uint16)
+        center = size // 2
+        radius = size // 4
+        for i in range(size):
+            for j in range(size):
+                image[i, j] = int((i + j) * 3000 / (2 * size))
+                if (i - center) ** 2 + (j - center) ** 2 < radius ** 2:
+                    image[i, j] = 2200 if modality == "CT" else 1800
+        ds.PixelData = image.tobytes()
+        ds.save_as(filename)
+
+    for modality, subdir in (("CT", "ct_scan"), ("MR", "mr_scan")):
+        out_dir = os.path.expanduser(f"~/DICOM/samples/{subdir}")
+        os.makedirs(out_dir, exist_ok=True)
+        if any(os.scandir(out_dir)):
+            continue
+        for idx in range(5):
+            create_sample_dicom(os.path.join(out_dir, f"{modality}_slice_{idx + 1:03d}.dcm"), modality=modality)
+        print(f"Created smoke fallback {modality} files in {out_dir}")
+except Exception as e:
+    print(f"Error creating smoke fallback DICOM files: {e}")
+PYEOF
+    fi
+
     # Set proper permissions for DICOM files
     chown -R $username:$username "$home_dir/DICOM"
     chmod -R 755 "$home_dir/DICOM"
@@ -193,7 +266,13 @@ export DISPLAY=${DISPLAY:-:1}
 xhost +local: 2>/dev/null || true
 
 # Determine Weasis executable
-if command -v /snap/bin/weasis &> /dev/null; then
+if [ -x "/opt/weasis/bin/weasis" ]; then
+    WEASIS_CMD="/opt/weasis/bin/weasis"
+elif [ -x "/usr/bin/weasis" ]; then
+    WEASIS_CMD="/usr/bin/weasis"
+elif [ -x "/usr/local/bin/weasis" ]; then
+    WEASIS_CMD="/usr/local/bin/weasis"
+elif command -v /snap/bin/weasis &> /dev/null; then
     WEASIS_CMD="/snap/bin/weasis"
 elif command -v weasis &> /dev/null; then
     WEASIS_CMD="weasis"
@@ -211,6 +290,25 @@ LAUNCHEOF
     chown $username:$username "$home_dir/launch_weasis.sh"
     chmod +x "$home_dir/launch_weasis.sh"
     echo "  - Created launch script"
+
+    if [ ! -x /snap/bin/weasis ]; then
+        mkdir -p /snap/bin
+        cat > /snap/bin/weasis << 'WRAPEOF'
+#!/bin/bash
+export DISPLAY=${DISPLAY:-:1}
+if [ -x /opt/weasis/bin/weasis ]; then
+    exec /opt/weasis/bin/weasis "$@"
+elif [ -x /usr/bin/weasis ]; then
+    exec /usr/bin/weasis "$@"
+elif [ -x /usr/local/bin/weasis ]; then
+    exec /usr/local/bin/weasis "$@"
+fi
+echo "Weasis not found!" >&2
+exit 1
+WRAPEOF
+        chmod +x /snap/bin/weasis
+        echo "  - Created /snap/bin/weasis compatibility wrapper"
+    fi
 }
 
 # Setup for ga user (the main VNC user)

@@ -68,7 +68,8 @@ focus_weasis() {
         sleep 0.5
         return 0
     fi
-    return 1
+    echo "WARNING: Weasis window not found; continuing without focusing"
+    return 0
 }
 
 # Check if Weasis is running
@@ -76,11 +77,27 @@ is_weasis_running() {
     pgrep -f "weasis" > /dev/null 2>&1
 }
 
+resolve_weasis_cmd() {
+    for cmd in "/home/ga/launch_weasis.sh" "/opt/weasis/bin/weasis" "/snap/bin/weasis"; do
+        if [ -x "$cmd" ]; then
+            echo "$cmd"
+            return 0
+        fi
+    done
+    command -v weasis 2>/dev/null && return 0
+    return 1
+}
+
 # Launch Weasis if not running
 ensure_weasis_running() {
     if ! is_weasis_running; then
         echo "Starting Weasis..."
-        DISPLAY=:1 /snap/bin/weasis > /tmp/weasis_ga.log 2>&1 &
+        local weasis_cmd
+        weasis_cmd=$(resolve_weasis_cmd) || {
+            echo "ERROR: Weasis not found"
+            return 1
+        }
+        DISPLAY=:1 "$weasis_cmd" > /tmp/weasis_ga.log 2>&1 &
         sleep 5
         wait_for_weasis 60
     fi
@@ -90,7 +107,12 @@ ensure_weasis_running() {
 launch_weasis_with_dicom() {
     local dicom_path="$1"
     echo "Launching Weasis with: $dicom_path"
-    DISPLAY=:1 /snap/bin/weasis "$dicom_path" > /tmp/weasis_ga.log 2>&1 &
+    local weasis_cmd
+    weasis_cmd=$(resolve_weasis_cmd) || {
+        echo "ERROR: Weasis not found"
+        return 1
+    }
+    DISPLAY=:1 "$weasis_cmd" "$dicom_path" > /tmp/weasis_ga.log 2>&1 &
     sleep 5
     wait_for_weasis 60
 }

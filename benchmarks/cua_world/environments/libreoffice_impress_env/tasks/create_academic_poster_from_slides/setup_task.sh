@@ -32,7 +32,7 @@ slides_content = [
 ]
 
 for i, (title_text, body_text) in enumerate(slides_content):
-    page = Page(name=f"Slide{i+1}")
+    page = Page(name=f"Slide{i+1}", masterpagename="Default")
     doc.presentation.addElement(page)
 
     # Title Frame

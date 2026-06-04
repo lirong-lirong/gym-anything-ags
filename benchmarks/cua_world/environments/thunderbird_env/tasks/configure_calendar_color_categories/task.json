@@ -26,9 +26,9 @@
     }
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_calendar_categories"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

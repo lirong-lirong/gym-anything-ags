@@ -54,7 +54,7 @@ def create_presentation():
     ]
     
     for title, content in slides_data:
-        page = Page(name=title)
+        page = Page(name=title, masterpagename="Default")
         doc.presentation.addElement(page)
         
         # Title

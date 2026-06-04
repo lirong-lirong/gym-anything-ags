@@ -6,7 +6,7 @@ echo "=== Setting up Cryptographic Vulnerabilities Task ==="
 date +%s > /tmp/task_start_time.txt
 
 # Install required Python packages globally
-pip3 install --no-cache-dir pycryptodome PyJWT pandas
+pip3 install --no-cache-dir --break-system-packages pycryptodome PyJWT pandas
 
 WORKSPACE="/home/ga/workspace/fintech_crypto"
 mkdir -p "$WORKSPACE/crypto_utils"

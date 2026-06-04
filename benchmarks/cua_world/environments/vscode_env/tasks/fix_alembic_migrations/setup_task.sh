@@ -13,7 +13,7 @@ date +%s > /tmp/task_start_time.txt
 
 # Install dependencies
 echo "Installing Python dependencies..."
-pip3 install --no-cache-dir alembic sqlalchemy pytest > /dev/null 2>&1
+pip3 install --break-system-packages --no-cache-dir alembic sqlalchemy pytest > /dev/null 2>&1
 
 # 1. Generate the Mock DB Creation Script
 cat > "$WORKSPACE_DIR/create_db.py" << 'EOF'

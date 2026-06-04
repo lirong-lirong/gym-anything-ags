@@ -11,70 +11,60 @@ date +%s > /tmp/task_start_time.txt
 # Ensure directories exist
 sudo -u ga mkdir -p /home/ga/Documents/Presentations
 
-# Define file paths
-PPTX_PATH="/home/ga/Documents/Presentations/quarterly_review.pptx"
 ODP_PATH="/home/ga/Documents/Presentations/quarterly_review.odp"
 
 # Clean up previous runs
-rm -f "$PPTX_PATH" "$ODP_PATH" 2>/dev/null || true
+rm -f "$ODP_PATH" 2>/dev/null || true
 
-# Generate the initial presentation using python-pptx (easier programmatic generation)
-# We will convert it to ODP immediately after.
+# Generate the initial presentation directly as ODP. Avoid a PPTX conversion
+# step here because headless LibreOffice conversion can be flaky in sandboxes.
 python3 << 'PYEOF'
-from pptx import Presentation
-from pptx.util import Inches, Pt
+from odf.opendocument import OpenDocumentPresentation
+from odf.draw import Page, Frame, TextBox
+from odf.text import P
 
-prs = Presentation()
+doc = OpenDocumentPresentation()
 
-# Slide 1: Quarterly Sales Overview
-slide1 = prs.slides.add_slide(prs.slide_layouts[1])  # Title and Content
-slide1.shapes.title.text = "Quarterly Sales Overview"
-body1 = slide1.placeholders[1]
-tf1 = body1.text_frame
-tf1.text = "Total Revenue: $4.2M"
-p = tf1.add_paragraph()
-p.text = "Year-over-Year Growth: 12%"
-p = tf1.add_paragraph()
-p.text = "New Customers: 47"
+def add_slide(name, title, bullets):
+    page = Page(name=name, masterpagename="Default")
+    doc.presentation.addElement(page)
 
-# Slide 2: Top Performing Products
-slide2 = prs.slides.add_slide(prs.slide_layouts[1])
-slide2.shapes.title.text = "Top Performing Products"
-body2 = slide2.placeholders[1]
-tf2 = body2.text_frame
-tf2.text = "Enterprise Suite: $1.8M"
-p = tf2.add_paragraph()
-p.text = "Cloud Platform: $1.3M"
-p = tf2.add_paragraph()
-p.text = "Support Services: $1.1M"
+    title_frame = Frame(width="24cm", height="2cm", x="1.5cm", y="1cm")
+    page.addElement(title_frame)
+    title_box = TextBox()
+    title_frame.addElement(title_box)
+    title_box.addElement(P(text=title))
 
-# Slide 3: Next Quarter Priorities
-slide3 = prs.slides.add_slide(prs.slide_layouts[1])
-slide3.shapes.title.text = "Next Quarter Priorities"
-body3 = slide3.placeholders[1]
-tf3 = body3.text_frame
-tf3.text = "Expand into healthcare vertical"
-p = tf3.add_paragraph()
-p.text = "Launch partner program"
-p = tf3.add_paragraph()
-p.text = "Increase retention rate to 95%"
+    body_frame = Frame(width="24cm", height="12cm", x="2cm", y="4cm")
+    page.addElement(body_frame)
+    body_box = TextBox()
+    body_frame.addElement(body_box)
+    for bullet in bullets:
+        body_box.addElement(P(text=bullet))
 
-prs.save("/home/ga/Documents/Presentations/quarterly_review.pptx")
+add_slide("Slide1", "Quarterly Sales Overview", [
+    "Total Revenue: $4.2M",
+    "Year-over-Year Growth: 12%",
+    "New Customers: 47",
+])
+add_slide("Slide2", "Top Performing Products", [
+    "Enterprise Suite: $1.8M",
+    "Cloud Platform: $1.3M",
+    "Support Services: $1.1M",
+])
+add_slide("Slide3", "Next Quarter Priorities", [
+    "Expand into healthcare vertical",
+    "Launch partner program",
+    "Increase retention rate to 95%",
+])
+
+doc.save("/home/ga/Documents/Presentations/quarterly_review.odp")
 PYEOF
-
-# Convert PPTX to ODP using LibreOffice headless
-echo "Converting generated PPTX to ODP..."
-cd /home/ga/Documents/Presentations/
-libreoffice --headless --convert-to odp "$PPTX_PATH" > /dev/null 2>&1
-sleep 2
 
 if [ ! -f "$ODP_PATH" ]; then
     echo "ERROR: Failed to create ODP file"
     exit 1
 fi
-
-# Cleanup PPTX
-rm "$PPTX_PATH"
 
 # Set ownership
 chown ga:ga "$ODP_PATH"

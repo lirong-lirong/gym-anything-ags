@@ -225,8 +225,15 @@ PYEOF
 sudo chown -R ga:ga "$WORKSPACE_DIR"
 
 # Install dependencies
-echo "Installing Python dependencies..."
-sudo -u ga pip3 install -r "$WORKSPACE_DIR/requirements.txt"
+if sudo -u ga python3 - <<'PY' >/dev/null 2>&1
+import pytest, sqlalchemy
+PY
+then
+    echo "Python dependencies already installed"
+else
+    echo "Installing Python dependencies..."
+    sudo -u ga pip3 install --break-system-packages -r "$WORKSPACE_DIR/requirements.txt"
+fi
 
 # Ensure VSCode is running
 if ! pgrep -f "code.*--ms-enable-electron-run-as-node" > /dev/null; then

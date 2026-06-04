@@ -44,6 +44,13 @@ chown ga:ga /home/ga/start_stellarium.sh
 cp /workspace/scripts/task_utils.sh /home/ga/task_utils.sh
 chown ga:ga /home/ga/task_utils.sh
 
+if [ "${GYM_ANYTHING_FAST_POST_START:-0}" = "1" ]; then
+    echo "GYM_ANYTHING_FAST_POST_START=1: skipping Stellarium GUI warm-up launch"
+    echo "=== Stellarium setup complete (fast post_start) ==="
+    echo "Launch with: bash /home/ga/start_stellarium.sh"
+    exit 0
+fi
+
 # ── 7. Warm-up launch to clear first-run state ──────────────────────
 echo "--- Warm-up launch of Stellarium ---"
 su - ga -c "bash /home/ga/start_stellarium.sh"

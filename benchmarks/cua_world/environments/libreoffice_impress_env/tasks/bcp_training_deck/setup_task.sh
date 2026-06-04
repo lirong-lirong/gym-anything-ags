@@ -17,7 +17,7 @@ doc = OpenDocumentPresentation()
 
 def add_slide(doc, title_text, bullets=None):
     idx = len(doc.presentation.childNodes) + 1
-    page = Page(name=f"Slide{idx}")
+    page = Page(name=f"Slide{idx}", masterpagename="Default")
     doc.presentation.addElement(page)
 
     tf = Frame(width="24cm", height="3cm", x="2cm", y="0.8cm")

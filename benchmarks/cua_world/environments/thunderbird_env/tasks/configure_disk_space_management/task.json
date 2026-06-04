@@ -22,9 +22,9 @@
     "expected_trash_count": 0
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_disk_space_management"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

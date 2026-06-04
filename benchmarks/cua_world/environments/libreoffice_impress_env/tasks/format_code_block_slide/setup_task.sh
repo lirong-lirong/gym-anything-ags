@@ -21,7 +21,7 @@ from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 doc = OpenDocumentPresentation()
 
 # Slide 1
-page1 = Page(name="Slide1")
+page1 = Page(name="Slide1", masterpagename="Default")
 doc.presentation.addElement(page1)
 frame1 = Frame(width="25cm", height="3cm", x="1.5cm", y="1cm")
 page1.addElement(frame1)
@@ -30,7 +30,7 @@ frame1.addElement(tb1)
 tb1.addElement(P(text="User API V2 Overview"))
 
 # Slide 2
-page2 = Page(name="Slide2")
+page2 = Page(name="Slide2", masterpagename="Default")
 doc.presentation.addElement(page2)
 frame2 = Frame(width="25cm", height="3cm", x="1.5cm", y="1cm")
 page2.addElement(frame2)

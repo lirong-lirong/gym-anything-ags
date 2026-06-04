@@ -182,7 +182,7 @@ chown -R ga:ga "$WORKSPACE_DIR"
 
 # Install test dependencies
 echo "Installing dependencies..."
-pip install -q pytest requests
+pip install -q --break-system-packages pytest requests
 
 # Launch VS Code pointing to the workspace
 echo "Launching VS Code..."

@@ -21,6 +21,12 @@ wait_for_window() {
             echo "Window found after ${elapsed}s"
             return 0
         fi
+        if echo "$window_pattern" | grep -qi 'writer\|libreoffice\|\.docx\|\.odt'; then
+            if wmctrl -l 2>/dev/null | grep -qi 'writer\|libreoffice\|\.docx\|\.odt'; then
+                echo "LibreOffice window found after ${elapsed}s"
+                return 0
+            fi
+        fi
         sleep 0.5
         elapsed=$((elapsed + 1))
     done
@@ -98,7 +104,7 @@ focus_window() {
 # Get the window ID for LibreOffice Writer
 # Returns: window ID or empty string
 get_writer_window_id() {
-    wmctrl -l | grep -i 'LibreOffice Writer\|\.docx\|\.odt' | awk '{print $1; exit}'
+    wmctrl -l | grep -i 'LibreOffice Writer\|LibreOffice\|\.docx\|\.odt' | awk '{print $1; exit}'
 }
 
 # Safe xdotool command with display and user context
@@ -110,8 +116,15 @@ safe_xdotool() {
     local display="$2"
     shift 2
 
-    su - "$user" -c "DISPLAY=$display xdotool $*" 2>&1 | grep -v "^$"
-    return ${PIPESTATUS[0]}
+    su - "$user" -c "DISPLAY=$display xdotool $*" 2>&1 | grep -v "^$" || true
+}
+
+take_screenshot() {
+    local output_file="${1:-/tmp/screenshot.png}"
+    DISPLAY=:1 scrot "$output_file" 2>/dev/null || \
+    DISPLAY=:1 import -window root "$output_file" 2>/dev/null || \
+    echo "Warning: Could not take screenshot"
+    [ -f "$output_file" ] && echo "Screenshot saved: $output_file"
 }
 
 # Export these functions for use in other scripts
@@ -121,3 +134,4 @@ export -f wait_for_process
 export -f focus_window
 export -f get_writer_window_id
 export -f safe_xdotool
+export -f take_screenshot

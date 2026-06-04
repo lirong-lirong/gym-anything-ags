@@ -193,7 +193,7 @@ chown -R ga:ga "$WORKSPACE_DIR"
 
 # Install pytest
 echo "Installing pytest..."
-pip3 install pytest > /dev/null 2>&1
+pip3 install --break-system-packages pytest > /dev/null 2>&1
 
 # Record start time
 date +%s > /tmp/task_start_time.txt

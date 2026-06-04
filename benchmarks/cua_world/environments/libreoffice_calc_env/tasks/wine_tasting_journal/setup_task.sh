@@ -70,7 +70,7 @@ table.addElement(TableColumn(stylename=col_style_wide))  # Wine Name
 table.addElement(TableColumn(stylename=col_style_medium))  # Varietal
 table.addElement(TableColumn(stylename=col_style_medium))  # Rating
 table.addElement(TableColumn(stylename=col_style_medium))  # Price
-table.addElement(TableColumn(stylename=col_notes))  # Flavor Notes
+table.addElement(TableColumn(stylename=col_style_notes))  # Flavor Notes
 table.addElement(TableColumn(stylename=col_style_medium))  # Recommend?
 
 # Row 1: Headers

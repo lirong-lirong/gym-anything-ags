@@ -10,7 +10,13 @@ date +%s > /tmp/task_start_time.txt
 
 # Install dependencies needed for the CV pipeline
 echo "Installing OpenCV and Pytest..."
-su - ga -c "pip3 install --no-cache-dir opencv-python-headless numpy pytest"
+if ! su - ga -c "python3 - <<'PY'
+import cv2
+import numpy
+import pytest
+PY"; then
+    su - ga -c "pip3 install --no-cache-dir --break-system-packages opencv-python-headless numpy pytest"
+fi
 
 WORKSPACE_DIR="/home/ga/workspace/doc_processor"
 sudo -u ga mkdir -p "$WORKSPACE_DIR/pipeline"
@@ -46,7 +52,7 @@ def create_fallback_form():
 try:
     url = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/1040EZ_2011.pdf/page1-800px-1040EZ_2011.pdf.jpg"
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    with urllib.request.urlopen(req) as response:
+    with urllib.request.urlopen(req, timeout=15) as response:
         img_arr = np.asarray(bytearray(response.read()), dtype=np.uint8)
         img = cv2.imdecode(img_arr, cv2.IMREAD_COLOR)
         if img is None:

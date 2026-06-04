@@ -32,9 +32,9 @@
     }
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_ultrasound_export"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

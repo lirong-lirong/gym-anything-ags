@@ -59,10 +59,16 @@ chown ga:ga /home/ga/BlenderProjects
 rm -f "/home/ga/BlenderProjects/exoplanet_viz.blend"
 
 # Launch Blender with default scene
-launch_blender_clean()
+su - ga -c "DISPLAY=:1 /opt/blender/blender &"
 
-# Wait for Blender
-wait_for_blender
+# Wait for Blender process/window best-effort.
+for i in $(seq 1 30); do
+    if pgrep -x blender >/dev/null; then
+        sleep 3
+        break
+    fi
+    sleep 1
+done
 
 # Maximize window
 maximize_blender

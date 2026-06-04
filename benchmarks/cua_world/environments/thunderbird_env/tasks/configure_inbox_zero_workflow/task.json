@@ -15,9 +15,9 @@
   },
   "metadata": {},
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_inbox_zero_workflow"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

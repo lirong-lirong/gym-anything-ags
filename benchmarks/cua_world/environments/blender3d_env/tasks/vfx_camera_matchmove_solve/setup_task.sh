@@ -88,6 +88,7 @@ bpy.ops.render.render(animation=True)
 PYEOF
 
 # Run generation (headless)
+chmod 644 "$GEN_SCRIPT"
 su - ga -c "/opt/blender/blender --background --python $GEN_SCRIPT" > /tmp/footage_gen.log 2>&1
 
 rm -f "$GEN_SCRIPT"

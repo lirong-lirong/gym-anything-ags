@@ -33,9 +33,9 @@
     ]
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_segregate_contacts"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

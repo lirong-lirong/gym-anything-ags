@@ -13,7 +13,7 @@ sudo -u ga mkdir -p "$WORKSPACE_DIR/log_analyzer"
 sudo -u ga mkdir -p "$WORKSPACE_DIR/tests/fixtures"
 
 # Ensure pytest is installed
-pip3 install -q pytest || true
+pip3 install --break-system-packages -q pytest || true
 
 # ──────────────────────────────────────────────────────────
 # 1. Generate README.md and init

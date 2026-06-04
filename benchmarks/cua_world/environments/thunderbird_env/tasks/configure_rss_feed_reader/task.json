@@ -19,9 +19,9 @@
     "expected_article_title": "Globex Corp Announces Q3 Results"
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_rss_feed_reader"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

@@ -9,7 +9,7 @@ date +%s > /tmp/task_start_time.txt
 # Install ortools if missing
 if ! python3 -c "import ortools" &> /dev/null; then
     echo "Installing ortools..."
-    pip3 install ortools --no-cache-dir
+    pip3 install ortools --no-cache-dir --break-system-packages
 fi
 
 WORKSPACE_DIR="/home/ga/workspace/routing_system"

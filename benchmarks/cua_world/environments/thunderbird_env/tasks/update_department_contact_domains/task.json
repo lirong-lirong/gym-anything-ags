@@ -21,9 +21,9 @@
     "expected_non_legal_count": 10
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_update_domains"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

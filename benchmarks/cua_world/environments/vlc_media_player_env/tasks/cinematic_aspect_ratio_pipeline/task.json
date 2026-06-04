@@ -46,9 +46,9 @@
     "resolution_tolerance_px": 4
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_cinematic_aspect_ratio_pipeline"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

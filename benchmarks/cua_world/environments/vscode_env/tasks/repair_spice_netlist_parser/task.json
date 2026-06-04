@@ -28,9 +28,9 @@
     "pass_threshold": 60
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_spice_parser"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

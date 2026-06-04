@@ -12,7 +12,7 @@ sudo -u ga mkdir -p "$WORKSPACE_DIR/tests"
 sudo -u ga mkdir -p "$WORKSPACE_DIR/data/enron_sample"
 
 # Install required packages (cryptography)
-pip3 install cryptography pytest > /dev/null 2>&1
+pip3 install --break-system-packages cryptography pytest > /dev/null 2>&1
 
 # 1. Generate Authentic Enron Email Samples (Real Data)
 cat > "$WORKSPACE_DIR/data/enron_sample/email_1.txt" << 'EOF'

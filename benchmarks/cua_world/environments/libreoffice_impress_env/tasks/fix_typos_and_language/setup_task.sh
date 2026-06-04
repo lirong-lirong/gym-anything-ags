@@ -49,13 +49,13 @@ en_style.addElement(TextProperties(language="en", country="US"))
 doc.styles.addElement(en_style)
 
 # Slide 1: Title
-page1 = Page(name="Title")
+page1 = Page(name="Title", masterpagename="Default")
 doc.presentation.addElement(page1)
 create_text_box(page1, "2cm", "4cm", "24cm", "3cm", "Global Health Summit 2024")
 create_text_box(page1, "2cm", "8cm", "24cm", "2cm", "Strategic Planning Draft")
 
 # Slide 2: Challenges (With Typos)
-page2 = Page(name="Key Challenges")
+page2 = Page(name="Key Challenges", masterpagename="Default")
 doc.presentation.addElement(page2)
 create_text_box(page2, "2cm", "2cm", "24cm", "2cm", "Key Challenges")
 bullets = [
@@ -66,7 +66,7 @@ bullets = [
 create_text_box(page2, "2cm", "5cm", "24cm", "10cm", bullets, style_name="ForceEnglish")
 
 # Slide 3: French Content (Incorrectly marked as English)
-page3 = Page(name="Partenariat Stratégique")
+page3 = Page(name="Partenariat Stratégique", masterpagename="Default")
 doc.presentation.addElement(page3)
 create_text_box(page3, "2cm", "2cm", "24cm", "2cm", "Partenariat Stratégique")
 french_text = "Nous devons collaborer pour améliorer la santé mondiale. " \

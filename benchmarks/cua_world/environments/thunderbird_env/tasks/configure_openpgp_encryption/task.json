@@ -18,9 +18,9 @@
     "expected_uid": "testuser@example.com"
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_configure_openpgp"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

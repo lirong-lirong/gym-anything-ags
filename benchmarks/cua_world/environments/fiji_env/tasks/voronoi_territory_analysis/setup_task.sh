@@ -22,22 +22,27 @@ echo "Preparing image data..."
 BBBC_URL="https://data.broadinstitute.org/bbbc/BBBC005/BBBC005_v1_images.zip"
 ZIP_FILE="/tmp/bbbc005.zip"
 
-# Download if not cached
-if [ ! -f "$ZIP_FILE" ]; then
-    echo "Downloading BBBC005 dataset..."
-    wget -q --timeout=120 "$BBBC_URL" -O "$ZIP_FILE" || {
-        echo "Download failed, trying backup..."
-        # Fallback to local sample if download fails (simulated for environment stability)
-        # In a real scenario, we might fail here.
-        echo "ERROR: Could not download dataset."
-        exit 1
-    }
-fi
+LOCAL_W1="/opt/fiji_samples/BBBC005/SIMULATION_C25_F1_s1_w1.TIF"
+LOCAL_W2="/opt/fiji_samples/BBBC005/SIMULATION_C25_F1_s1_w2.TIF"
 
-# Extract specific files: C25 (25 cells), F1 (in focus), w1 (body) and w2 (nuclei)
-# Pattern: BBBC005_v1_images/SIMULATION_C25_F1_s1_w1.TIF
-# We use Python to extract specific files to avoid unzipping everything
-python3 << PYEOF
+if [ -f "$LOCAL_W1" ] && [ -f "$LOCAL_W2" ]; then
+    echo "Using local BBBC005 samples from /opt/fiji_samples."
+    cp "$LOCAL_W1" "$RAW_DIR/cell_bodies.tif"
+    cp "$LOCAL_W2" "$RAW_DIR/cell_nuclei.tif"
+else
+    # Download if not cached
+    if [ ! -f "$ZIP_FILE" ]; then
+        echo "Downloading BBBC005 dataset..."
+        wget -q --timeout=120 "$BBBC_URL" -O "$ZIP_FILE" || {
+            echo "ERROR: Could not download dataset and local samples are unavailable."
+            exit 1
+        }
+    fi
+
+    # Extract specific files: C25 (25 cells), F1 (in focus), w1 (body) and w2 (nuclei)
+    # Pattern: BBBC005_v1_images/SIMULATION_C25_F1_s1_w1.TIF
+    # We use Python to extract specific files to avoid unzipping everything
+    python3 << PYEOF
 import zipfile
 import shutil
 import os
@@ -63,6 +68,7 @@ except Exception as e:
     print(f"Error extracting files: {e}")
     exit(1)
 PYEOF
+fi
 
 # Create task info file
 cat > "$RAW_DIR/task_info.txt" << INFOEOF

@@ -149,6 +149,12 @@ wmctrl -l | grep -i 'WPS Spreadsheet\|\.xlsx\|\.xls\|\.et' | awk '{print $1; exi
 GETWINEOF
 chmod +x /usr/local/bin/get-wps-et-window
 
+if [ "${GYM_ANYTHING_FAST_POST_START:-0}" = "1" ]; then
+    echo "GYM_ANYTHING_FAST_POST_START=1: skipping WPS GUI warm-up launch"
+    echo "=== WPS Office Spreadsheet configuration completed (fast post_start) ==="
+    exit 0
+fi
+
 # ================================================================
 # First-run: Launch WPS to accept EULA and dismiss all startup dialogs
 # ================================================================
@@ -182,102 +188,102 @@ fi
 
 run_as_ga "xhost +local:" 2>/dev/null || true
 
-# Launch WPS Spreadsheet for warm-up (first-run clears dialogs)
-run_as_ga "et &"
+    # Launch WPS Spreadsheet for warm-up (first-run clears dialogs)
+    run_as_ga "et &"
 
-# Wait for WPS window to appear
-echo "  - Waiting for WPS to load..."
-for i in $(seq 1 30); do
-    if run_as_ga "wmctrl -l" 2>/dev/null | grep -qi "Spreadsheets\|\.xlsx\|\.et"; then
-        echo "  - WPS window detected after ${i}s"
-        break
+    # Wait for WPS window to appear
+    echo "  - Waiting for WPS to load..."
+    for i in $(seq 1 30); do
+        if run_as_ga "wmctrl -l" 2>/dev/null | grep -qi "Spreadsheets\|\.xlsx\|\.et"; then
+            echo "  - WPS window detected after ${i}s"
+            break
+        fi
+        sleep 2
+    done
+
+    # Additional wait for dialogs to fully render
+    sleep 5
+
+    # Check if EULA dialog appeared
+    EULA_WIN=$(run_as_ga "wmctrl -l" 2>/dev/null | grep -i "License Agreement" | awk '{print $1}')
+    if [ -n "$EULA_WIN" ]; then
+        echo "  - EULA dialog detected, auto-accepting..."
+        # Click the "agree" checkbox (scaled 430,432 from 1280x720 -> 645,648 at 1920x1080)
+        run_as_ga "xdotool mousemove 645 648 click 1"
+        sleep 1
+        # Click "I confirm" button (scaled 860,432 -> 1290,648)
+        run_as_ga "xdotool mousemove 1290 648 click 1"
+        sleep 3
+        echo "  - EULA accepted"
+    else
+        echo "  - No EULA dialog (config pre-set)"
     fi
-    sleep 2
-done
 
-# Additional wait for dialogs to fully render
-sleep 5
+    # Wait for any remaining dialogs to appear
+    sleep 5
 
-# Check if EULA dialog appeared
-EULA_WIN=$(run_as_ga "wmctrl -l" 2>/dev/null | grep -i "License Agreement" | awk '{print $1}')
-if [ -n "$EULA_WIN" ]; then
-    echo "  - EULA dialog detected, auto-accepting..."
-    # Click the "agree" checkbox (scaled 430,432 from 1280x720 -> 645,648 at 1920x1080)
-    run_as_ga "xdotool mousemove 645 648 click 1"
+    # ----------------------------------------------------------------
+    # Dismiss all startup dialogs with retry loop (front-to-back order)
+    # Dialogs: "WPS Office" (default app), "Checking completed!", "System Check"
+    # ----------------------------------------------------------------
+    echo "  - Dismissing startup dialogs..."
+    for _attempt in 1 2 3 4 5; do
+        WINDOWS=$(run_as_ga "wmctrl -l" 2>/dev/null)
+
+        # 1. Close "WPS Office" default-app dialog (activate + press Enter on OK button)
+        WPS_DIALOG=$(echo "$WINDOWS" | grep -i "WPS Office$" | awk '{print $1}')
+        if [ -n "$WPS_DIALOG" ]; then
+            echo "    Dismissing 'WPS Office' dialog (attempt $_attempt)..."
+            run_as_ga "wmctrl -ia '$WPS_DIALOG'" 2>/dev/null || true
+            sleep 0.5
+            run_as_ga "xdotool key Return" 2>/dev/null || true
+            sleep 2
+        fi
+
+        # 2. Close "System Check" dialog (activate + Alt+F4)
+        SYSCHECK_WIN=$(echo "$WINDOWS" | grep -i "System Check" | awk '{print $1}')
+        if [ -n "$SYSCHECK_WIN" ]; then
+            echo "    Dismissing 'System Check' dialog (attempt $_attempt)..."
+            run_as_ga "wmctrl -ia '$SYSCHECK_WIN'" 2>/dev/null || true
+            sleep 0.5
+            run_as_ga "xdotool key alt+F4" 2>/dev/null || true
+            sleep 2
+        fi
+
+        # 3. Close any "Checking completed" sub-dialog
+        CHECK_WIN=$(echo "$WINDOWS" | grep -i "Checking completed" | awk '{print $1}')
+        if [ -n "$CHECK_WIN" ]; then
+            echo "    Dismissing 'Checking completed' dialog (attempt $_attempt)..."
+            run_as_ga "wmctrl -ia '$CHECK_WIN'" 2>/dev/null || true
+            sleep 0.5
+            run_as_ga "xdotool key Return" 2>/dev/null || true
+            sleep 2
+        fi
+
+        # Check if all dialogs are gone
+        REMAINING=$(run_as_ga "wmctrl -l" 2>/dev/null | grep -ciE "System Check|WPS Office$|Checking completed")
+        if [ "$REMAINING" -eq 0 ]; then
+            echo "  - All dialogs dismissed after $_attempt attempt(s)"
+            break
+        fi
+        sleep 2
+    done
+
+    # Final fallback: press Escape to close any remaining modal dialogs
+    run_as_ga "xdotool key Escape" 2>/dev/null || true
     sleep 1
-    # Click "I confirm" button (scaled 860,432 -> 1290,648)
-    run_as_ga "xdotool mousemove 1290 648 click 1"
+
+    # Let WPS save its config (suppresses dialogs on future launches)
     sleep 3
-    echo "  - EULA accepted"
-else
-    echo "  - No EULA dialog (config pre-set)"
-fi
 
-# Wait for any remaining dialogs to appear
-sleep 5
-
-# ----------------------------------------------------------------
-# Dismiss all startup dialogs with retry loop (front-to-back order)
-# Dialogs: "WPS Office" (default app), "Checking completed!", "System Check"
-# ----------------------------------------------------------------
-echo "  - Dismissing startup dialogs..."
-for _attempt in 1 2 3 4 5; do
-    WINDOWS=$(run_as_ga "wmctrl -l" 2>/dev/null)
-
-    # 1. Close "WPS Office" default-app dialog (activate + press Enter on OK button)
-    WPS_DIALOG=$(echo "$WINDOWS" | grep -i "WPS Office$" | awk '{print $1}')
-    if [ -n "$WPS_DIALOG" ]; then
-        echo "    Dismissing 'WPS Office' dialog (attempt $_attempt)..."
-        run_as_ga "wmctrl -ia '$WPS_DIALOG'" 2>/dev/null || true
-        sleep 0.5
-        run_as_ga "xdotool key Return" 2>/dev/null || true
-        sleep 2
-    fi
-
-    # 2. Close "System Check" dialog (activate + Alt+F4)
-    SYSCHECK_WIN=$(echo "$WINDOWS" | grep -i "System Check" | awk '{print $1}')
-    if [ -n "$SYSCHECK_WIN" ]; then
-        echo "    Dismissing 'System Check' dialog (attempt $_attempt)..."
-        run_as_ga "wmctrl -ia '$SYSCHECK_WIN'" 2>/dev/null || true
-        sleep 0.5
-        run_as_ga "xdotool key alt+F4" 2>/dev/null || true
-        sleep 2
-    fi
-
-    # 3. Close any "Checking completed" sub-dialog
-    CHECK_WIN=$(echo "$WINDOWS" | grep -i "Checking completed" | awk '{print $1}')
-    if [ -n "$CHECK_WIN" ]; then
-        echo "    Dismissing 'Checking completed' dialog (attempt $_attempt)..."
-        run_as_ga "wmctrl -ia '$CHECK_WIN'" 2>/dev/null || true
-        sleep 0.5
-        run_as_ga "xdotool key Return" 2>/dev/null || true
-        sleep 2
-    fi
-
-    # Check if all dialogs are gone
-    REMAINING=$(run_as_ga "wmctrl -l" 2>/dev/null | grep -ciE "System Check|WPS Office$|Checking completed")
-    if [ "$REMAINING" -eq 0 ]; then
-        echo "  - All dialogs dismissed after $_attempt attempt(s)"
-        break
-    fi
+    # Kill WPS processes specifically (NOT pkill -f "et" which kills gnome-settings-daemon etc.)
+    pkill -x et 2>/dev/null || true
+    pkill -x wps 2>/dev/null || true
+    pkill -x wpp 2>/dev/null || true
+    pkill -x wpspdf 2>/dev/null || true
+    pkill -f "/office6/et" 2>/dev/null || true
+    pkill -f "/office6/wps" 2>/dev/null || true
     sleep 2
-done
-
-# Final fallback: press Escape to close any remaining modal dialogs
-run_as_ga "xdotool key Escape" 2>/dev/null || true
-sleep 1
-
-# Let WPS save its config (suppresses dialogs on future launches)
-sleep 3
-
-# Kill WPS processes specifically (NOT pkill -f "et" which kills gnome-settings-daemon etc.)
-pkill -x et 2>/dev/null || true
-pkill -x wps 2>/dev/null || true
-pkill -x wpp 2>/dev/null || true
-pkill -x wpspdf 2>/dev/null || true
-pkill -f "/office6/et" 2>/dev/null || true
-pkill -f "/office6/wps" 2>/dev/null || true
-sleep 2
 
 # Update config to suppress future dialogs
 WPS_CONF="/home/ga/.config/Kingsoft/Office.conf"

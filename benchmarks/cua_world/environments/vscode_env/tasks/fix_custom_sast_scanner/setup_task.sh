@@ -13,7 +13,7 @@ sudo -u ga mkdir -p "$WORKSPACE_DIR/tests"
 sudo -u ga mkdir -p "$WORKSPACE_DIR/target_codebase"
 
 # Install pytest just in case
-pip3 install pytest > /dev/null 2>&1 || true
+pip3 install --break-system-packages pytest > /dev/null 2>&1 || true
 
 # ──────────────────────────────────────────────────────────
 # 1. scanner.py (CLI Entry Point)

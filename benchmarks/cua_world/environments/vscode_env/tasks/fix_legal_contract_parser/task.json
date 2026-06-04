@@ -25,9 +25,9 @@
     ]
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_fix_legal_contract_parser"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

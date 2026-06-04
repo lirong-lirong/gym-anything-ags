@@ -20,9 +20,9 @@
     "vlm_criteria": "The agent must open VS Code, view and edit visitor.py, run pytest, and iteratively fix the AST parsing bugs."
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_sast_scanner"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

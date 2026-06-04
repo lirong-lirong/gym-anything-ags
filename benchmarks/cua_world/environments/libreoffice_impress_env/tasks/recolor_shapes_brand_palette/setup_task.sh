@@ -19,7 +19,6 @@ from odf.opendocument import OpenDocumentPresentation
 from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties, TextProperties, GraphicProperties, ParagraphProperties, DrawingPageProperties
 from odf.draw import Page, Frame, TextBox, Rect, Ellipse
 from odf.text import P
-from odf.base import Double
 
 def create_presentation():
     doc = OpenDocumentPresentation()
@@ -45,18 +44,18 @@ def create_presentation():
     ]
 
     for i, (title_text, bullets) in enumerate(slides_content):
-        page = Page(name=f"Slide{i+1}")
+        page = Page(name=f"Slide{i+1}", masterpagename="Default")
         doc.presentation.addElement(page)
 
         # 1. Title Frame
-        title_frame = Frame(width="25cm", height="3cm", x="1.5cm", y="1cm", presentationclass="title")
+        title_frame = Frame(width="25cm", height="3cm", x="1.5cm", y="1cm")
         title_textbox = TextBox()
         title_frame.addElement(title_textbox)
         title_textbox.addElement(P(text=title_text, stylename=title_style))
         page.addElement(title_frame)
 
         # 2. Content Frame (Body text)
-        body_frame = Frame(width="25cm", height="8cm", x="1.5cm", y="4.5cm", presentationclass="outline")
+        body_frame = Frame(width="25cm", height="8cm", x="1.5cm", y="4.5cm")
         body_textbox = TextBox()
         body_frame.addElement(body_textbox)
         for bullet in bullets:

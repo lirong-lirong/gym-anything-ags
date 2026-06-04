@@ -223,7 +223,7 @@ def test_trim_low_quality():
 EOF
 
 # Install pytest for the workspace
-sudo -u ga pip3 install pytest --quiet
+sudo -u ga pip3 install pytest --quiet --break-system-packages
 
 # Fix permissions
 chown -R ga:ga "$WORKSPACE_DIR"

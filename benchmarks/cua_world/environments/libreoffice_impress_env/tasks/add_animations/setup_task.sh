@@ -16,7 +16,12 @@ rm -rf /tmp/lu*/ 2>/dev/null || true
 rm -f /tmp/.~lock.* 2>/dev/null || true
 
 # Copy the real IRENA renewable energy presentation as starting data
-cp /workspace/assets/renewable_energy_report.odp /home/ga/Documents/Presentations/animation_test.odp
+if [ -f /workspace/assets/renewable_energy_report.odp ]; then
+    cp /workspace/assets/renewable_energy_report.odp /home/ga/Documents/Presentations/animation_test.odp
+else
+    echo "WARNING: /workspace/assets/renewable_energy_report.odp missing; generating fallback presentation"
+    create_basic_impress_odp /home/ga/Documents/Presentations/animation_test.odp renewable
+fi
 chown ga:ga /home/ga/Documents/Presentations/animation_test.odp
 
 echo "Copied real data: IRENA Renewable Energy Report (5 slides)"

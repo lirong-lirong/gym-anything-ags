@@ -47,7 +47,7 @@ from odf.text import P
 doc = OpenDocumentPresentation()
 
 # Slide 1: Title
-page1 = Page(name="Title")
+page1 = Page(name="Title", masterpagename="Default")
 doc.presentation.addElement(page1)
 frame1 = Frame(width="20cm", height="3cm", x="2cm", y="10cm")
 page1.addElement(frame1)
@@ -56,7 +56,7 @@ frame1.addElement(tb1)
 tb1.addElement(P(text="Quarterly Review Q3"))
 
 # Slide 2: Sales (Image 1)
-page2 = Page(name="Sales")
+page2 = Page(name="Sales", masterpagename="Default")
 doc.presentation.addElement(page2)
 # Add placeholder for image 1
 # We use a dummy path here, we will replace it in XML later
@@ -64,7 +64,7 @@ img1 = DrawImage(href="Pictures/chart_sales.png", x="2cm", y="4cm", width="20cm"
 page2.addElement(img1)
 
 # Slide 3: Growth (Image 2)
-page3 = Page(name="Growth")
+page3 = Page(name="Growth", masterpagename="Default")
 doc.presentation.addElement(page3)
 # Add placeholder for image 2
 img2 = DrawImage(href="Pictures/graph_growth.png", x="2cm", y="4cm", width="20cm", height="12cm")

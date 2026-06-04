@@ -235,8 +235,9 @@ PY_EOF
 # ─────────────────────────────────────────────────────────────
 chown -R ga:ga "$WORKSPACE_DIR"
 
-# Ensure VSCode is stopped
-pkill -f "code" 2>/dev/null || true
+# Ensure VSCode is stopped for the sandbox user.
+pkill -u ga -x code 2>/dev/null || true
+pkill -u ga -f "/usr/share/code|/opt/visual-studio-code|code --" 2>/dev/null || true
 sleep 2
 
 echo "Starting VSCode..."

@@ -9,7 +9,7 @@ source /workspace/scripts/task_utils.sh
 date +%s > /tmp/task_start_time.txt
 
 # Ensure cryptography package is installed
-pip3 install cryptography --quiet
+pip3 install cryptography --quiet --break-system-packages
 
 WORKSPACE_DIR="/home/ga/workspace/ransomware_recovery"
 GT_DIR="/var/lib/app/ground_truth"

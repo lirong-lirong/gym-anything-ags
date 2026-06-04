@@ -21,14 +21,14 @@ from odf.opendocument import OpenDocumentSpreadsheet
 from odf.table import Table, TableRow, TableCell
 from odf.text import P
 from odf.style import Style, TableColumnProperties, TextProperties
-from odf.number import NumberStyle, Number, Text as NumberText, CurrencySymbol
+from odf.number import CurrencyStyle, Number, Text as NumberText, CurrencySymbol
 import random
 
 # Create new spreadsheet
 doc = OpenDocumentSpreadsheet()
 
 # Create styles for currency (optional, cells can be unformatted too)
-currency_style = NumberStyle(name="curr1")
+currency_style = CurrencyStyle(name="curr1")
 currency_style.addElement(CurrencySymbol(language="en", country="US", text="$"))
 currency_style.addElement(Number(decimalplaces=0, minintegerdigits=1))
 doc.styles.addElement(currency_style)

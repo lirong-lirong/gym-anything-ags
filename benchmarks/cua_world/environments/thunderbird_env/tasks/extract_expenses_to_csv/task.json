@@ -23,9 +23,9 @@
     "expected_rows_count": 5
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_extract_expenses"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

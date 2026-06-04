@@ -27,9 +27,9 @@
     "target_container": "mpegts"
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_in_flight_entertainment_media_packaging"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

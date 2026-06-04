@@ -20,6 +20,7 @@ echo "Generating surveillance data..."
 
 sudo -u ga python3 << 'PYDATA' > "$WORKSPACE_DIR/data/raw_surveillance_data.csv"
 import csv
+import sys
 from datetime import datetime, timedelta
 import random
 
@@ -227,7 +228,13 @@ EOF
 sudo chown -R ga:ga "$WORKSPACE_DIR"
 
 # Ensure pytest is installed
-pip3 install pytest pandas > /dev/null 2>&1
+if ! python3 - <<'PY'
+import pandas
+import pytest
+PY
+then
+    pip3 install --break-system-packages pytest pandas > /dev/null 2>&1
+fi
 
 # Record task start time
 date +%s > /tmp/task_start_time.txt

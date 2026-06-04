@@ -9,8 +9,15 @@ echo "=== Setting up Debug ML Model API Task ==="
 date +%s > /tmp/task_start_time
 
 # Install required packages
-echo "Installing Python dependencies..."
-sudo -u ga bash -c "pip3 install scikit-learn fastapi uvicorn httpx pytest pandas numpy joblib --no-warn-script-location"
+if sudo -u ga python3 - <<'PY' >/dev/null 2>&1
+import fastapi, httpx, joblib, numpy, pandas, pytest, sklearn, uvicorn
+PY
+then
+    echo "Python dependencies already installed"
+else
+    echo "Installing Python dependencies..."
+    sudo -u ga bash -c "pip3 install --break-system-packages scikit-learn fastapi uvicorn httpx pytest pandas numpy joblib --no-warn-script-location"
+fi
 
 # Setup Workspace
 WORKSPACE_DIR="/home/ga/workspace/ml_api"
@@ -51,7 +58,7 @@ expected_cols = ['age', 'bmi', 'heart_rate', 'blood_type_A', 'blood_type_AB', 'b
 for c in expected_cols:
     if c not in df_encoded.columns:
         df_encoded[c] = 0
-X = df_encoded[expected_cols]
+X = df_encoded[expected_cols].astype(float).copy()
 y = df['readmission']
 
 # Scale numerical features

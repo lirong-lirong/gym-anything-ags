@@ -29,9 +29,9 @@
     "pass_threshold": 70
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_task"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

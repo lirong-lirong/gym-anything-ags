@@ -30,7 +30,7 @@ from odf.text import P
 doc = OpenDocumentPresentation()
 
 # Slide 1: Title
-page1 = Page(name="Title")
+page1 = Page(name="Title", masterpagename="Default")
 doc.presentation.addElement(page1)
 frame = Frame(width="20cm", height="3cm", x="4cm", y="7cm")
 textbox = TextBox()
@@ -39,7 +39,7 @@ frame.addElement(textbox)
 page1.addElement(frame)
 
 # Slide 2: Blank (Target)
-page2 = Page(name="Photos")
+page2 = Page(name="Photos", masterpagename="Default")
 doc.presentation.addElement(page2)
 
 doc.save("/home/ga/Documents/Presentations/culture_deck.odp")

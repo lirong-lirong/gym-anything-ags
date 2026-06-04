@@ -93,7 +93,10 @@ def verify_loan_strategy(traj, env_info, task_info):
         
         # Get header row for reference
         header_row = rows[0]
-        num_columns = len([cell for cell in header_row if cell.get('value') if isinstance(cell, dict) else cell])
+        def has_value(cell):
+            return bool(cell.get('value')) if isinstance(cell, dict) else bool(cell)
+
+        num_columns = len([cell for cell in header_row if has_value(cell)])
         
         logger.info(f"Found {num_columns} columns in spreadsheet")
         

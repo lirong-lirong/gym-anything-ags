@@ -88,8 +88,9 @@ chown ga:ga "$WORKSPACE_DIR/fec_analysis.py"
 # ──────────────────────────────────────────────────────────
 # 4. Launch VS Code
 # ──────────────────────────────────────────────────────────
-# Kill any existing VSCode instances
-pkill -f "code" 2>/dev/null || true
+# Kill existing VSCode instances for the sandbox user without matching this shell.
+pkill -u ga -x code 2>/dev/null || true
+pkill -u ga -f "/usr/share/code|/opt/visual-studio-code|code --" 2>/dev/null || true
 sleep 2
 
 # Start VS Code in the workspace

@@ -41,10 +41,11 @@ EOF
 chown -R ga:ga "$WORKSPACE_DIR/starlette/routing.py"
 
 # Ensure pip packages are available
-pip3 install --no-cache-dir black flake8 pytest uvicorn > /dev/null 2>&1 || true
+pip3 install --break-system-packages --no-cache-dir black flake8 pytest uvicorn > /dev/null 2>&1 || true
 
-# Kill any existing VS Code instances
-pkill -f "code" 2>/dev/null || true
+# Kill existing VS Code instances for the sandbox user without matching this shell.
+pkill -u ga -x code 2>/dev/null || true
+pkill -u ga -f "/usr/share/code|/opt/visual-studio-code|code --" 2>/dev/null || true
 sleep 2
 
 # Launch VS Code in the workspace

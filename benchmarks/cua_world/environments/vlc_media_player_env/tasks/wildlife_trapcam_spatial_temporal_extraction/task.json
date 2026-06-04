@@ -45,9 +45,9 @@
     ]
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_wildlife_trapcam_extraction"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

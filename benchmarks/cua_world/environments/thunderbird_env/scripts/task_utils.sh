@@ -69,6 +69,10 @@ wait_for_thunderbird_window() {
     return 1
 }
 
+wait_for_thunderbird_ready() {
+    wait_for_thunderbird_window "${1:-30}"
+}
+
 # ============================================================
 # Email folder utilities
 # ============================================================
@@ -103,6 +107,27 @@ get_thunderbird_windows() {
     su - ga -c "DISPLAY=:1 wmctrl -l 2>/dev/null" | grep -i "thunderbird" || echo ""
 }
 
+get_thunderbird_window_id() {
+    get_thunderbird_windows | awk '{print $1; exit}'
+}
+
+focus_window() {
+    local window_id="$1"
+    if [ -z "$window_id" ]; then
+        echo "Warning: empty window id"
+        return 1
+    fi
+    su - ga -c "DISPLAY=:1 wmctrl -ia '$window_id' 2>/dev/null" || \
+    su - ga -c "DISPLAY=:1 wmctrl -a '$window_id' 2>/dev/null" || true
+}
+
+safe_xdotool() {
+    local user="$1"
+    local display="$2"
+    shift 2
+    su - "$user" -c "DISPLAY=$display xdotool $*" 2>/dev/null || true
+}
+
 has_compose_window() {
     su - ga -c "DISPLAY=:1 wmctrl -l 2>/dev/null" | grep -iE "(write|compose|new message)" > /dev/null 2>&1
 }
@@ -123,3 +148,22 @@ get_thunderbird_pref() {
         echo ""
     fi
 }
+
+export -f take_screenshot
+export -f is_thunderbird_running
+export -f get_thunderbird_pid
+export -f start_thunderbird
+export -f close_thunderbird
+export -f maximize_thunderbird
+export -f wait_for_thunderbird_window
+export -f wait_for_thunderbird_ready
+export -f count_emails_in_mbox
+export -f list_local_folders
+export -f folder_exists
+export -f get_thunderbird_windows
+export -f get_thunderbird_window_id
+export -f focus_window
+export -f safe_xdotool
+export -f has_compose_window
+export -f has_filter_dialog
+export -f get_thunderbird_pref

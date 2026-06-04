@@ -6,7 +6,12 @@ echo "=== Setting up Shift Scheduling Optimization Task ==="
 date +%s > /tmp/task_start_time.txt
 
 # Ensure pip dependencies (ortools, pandas)
-su - ga -c "pip3 install ortools pandas --no-cache-dir"
+if ! su - ga -c "python3 - <<'PY'
+import ortools
+import pandas
+PY"; then
+    su - ga -c "pip3 install ortools pandas --no-cache-dir --break-system-packages"
+fi
 
 WORKSPACE_DIR="/home/ga/workspace/nurse_scheduling"
 sudo -u ga mkdir -p "$WORKSPACE_DIR/data"

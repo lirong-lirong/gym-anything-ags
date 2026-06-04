@@ -42,9 +42,9 @@
     }
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_brand_template_creation"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

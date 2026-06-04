@@ -24,27 +24,31 @@ convert -size 400x400 xc:lightpink -gravity center -pointsize 40 -annotate 0 "HE
 echo "Creating messy presentation file..."
 python3 << PYEOF
 from odf.opendocument import OpenDocumentPresentation
-from odf.draw import Page, Frame, Image
+from odf.draw import Page, Frame, Image, TextBox
 from odf.text import P
 from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties, TextProperties, GraphicProperties
 
 doc = OpenDocumentPresentation()
 
 # Slide 1: Title
-page1 = Page(name="Slide1")
+page1 = Page(name="Slide1", masterpagename="Default")
 doc.presentation.addElement(page1)
 frame_title = Frame(width="25cm", height="3cm", x="1.5cm", y="2cm")
 page1.addElement(frame_title)
-frame_title.addElement(P(text="New Product Lineup 2024"))
+frame_title_box = TextBox()
+frame_title.addElement(frame_title_box)
+frame_title_box.addElement(P(text="New Product Lineup 2024"))
 
 # Slide 2: Messy Images
-page2 = Page(name="New Arrivals")
+page2 = Page(name="New Arrivals", masterpagename="Default")
 doc.presentation.addElement(page2)
 
 # Title for Slide 2
 frame_s2_title = Frame(width="25cm", height="3cm", x="1.5cm", y="1cm")
 page2.addElement(frame_s2_title)
-frame_s2_title.addElement(P(text="New Arrivals - Need Alignment"))
+frame_s2_title_box = TextBox()
+frame_s2_title.addElement(frame_s2_title_box)
+frame_s2_title_box.addElement(P(text="New Arrivals - Need Alignment"))
 
 # Define messy coordinates (cm)
 # Image 1 (Watch): Low Y, Left X

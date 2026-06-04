@@ -130,9 +130,10 @@ def render(obj_file, output_file):
     with open(obj_file, 'r') as f:
         for line in f:
             if line.startswith('v '):
-                vertices.append([float(x) for x in line.split()[1:4]] + [1.0])
+                vertices.append([float(value) for value in line.split()[1:4]] + [1.0])
             elif line.startswith('f '):
-                faces.append([int(x.split()[i].split('/')[0])-1 for i in range(1, 4)])
+                parts = line.split()
+                faces.append([int(parts[i].split('/')[0])-1 for i in range(1, 4)])
 
     vertices = np.array(vertices)
     vp = camera.viewport_matrix(width, height)

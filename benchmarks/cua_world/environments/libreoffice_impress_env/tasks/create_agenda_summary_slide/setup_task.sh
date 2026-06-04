@@ -19,7 +19,7 @@ from odf.text import P
 from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties, TextProperties, GraphicProperties
 
 def create_slide(doc, name, title_text, bullets=[]):
-    page = Page(name=name)
+    page = Page(name=name, masterpagename="Default")
     doc.presentation.addElement(page)
     
     # Title Frame

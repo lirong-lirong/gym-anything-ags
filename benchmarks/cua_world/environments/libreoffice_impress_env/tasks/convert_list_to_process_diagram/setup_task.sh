@@ -19,7 +19,7 @@ from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties, TextP
 doc = OpenDocumentPresentation()
 
 # Slide 1: Title
-page1 = Page(name="Slide1")
+page1 = Page(name="Slide1", masterpagename="Default")
 doc.presentation.addElement(page1)
 
 frame1 = Frame(width="720pt", height="56pt", x="56pt", y="42pt")
@@ -30,7 +30,7 @@ p1 = P(text="Project Alpha Launch")
 textbox1.addElement(p1)
 
 # Slide 2: Roadmap List
-page2 = Page(name="Slide2")
+page2 = Page(name="Slide2", masterpagename="Default")
 doc.presentation.addElement(page2)
 
 # Title for Slide 2

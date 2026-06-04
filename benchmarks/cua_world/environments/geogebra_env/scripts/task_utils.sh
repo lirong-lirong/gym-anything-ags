@@ -18,7 +18,13 @@ launch_geogebra() {
 
     echo "Launching GeoGebra for user $username..."
 
-    if [ -x "/usr/bin/geogebra-classic" ]; then
+    if [ -x "/home/$username/launch_geogebra.sh" ]; then
+        if [ -n "$file" ]; then
+            su - $username -c "DISPLAY=$display /home/$username/launch_geogebra.sh '$file' > /tmp/geogebra_$username.log 2>&1 &"
+        else
+            su - $username -c "DISPLAY=$display /home/$username/launch_geogebra.sh > /tmp/geogebra_$username.log 2>&1 &"
+        fi
+    elif [ -x "/usr/bin/geogebra-classic" ]; then
         if [ -n "$file" ]; then
             su - $username -c "DISPLAY=$display geogebra-classic '$file' > /tmp/geogebra_$username.log 2>&1 &"
         else
@@ -85,7 +91,8 @@ wait_for_window() {
     done
 
     echo "Timeout waiting for window '$title'"
-    return 1
+    echo "WARNING: continuing without detected '$title' window"
+    return 0
 }
 
 # Get GeoGebra window ID
@@ -109,7 +116,8 @@ focus_geogebra() {
         focus_window "$wid"
         return 0
     fi
-    return 1
+    echo "WARNING: GeoGebra window not found; continuing without focusing"
+    return 0
 }
 
 # Maximize GeoGebra window
@@ -120,7 +128,8 @@ maximize_geogebra() {
         sleep 0.5
         return 0
     fi
-    return 1
+    echo "WARNING: GeoGebra window not found; continuing without maximizing"
+    return 0
 }
 
 # Safe xdotool wrapper

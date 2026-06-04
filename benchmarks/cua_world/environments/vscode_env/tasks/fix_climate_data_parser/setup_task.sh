@@ -265,7 +265,8 @@ chmod 600 /var/lib/app/ground_truth_eval/eval_tests.py
 # ─────────────────────────────────────────────────────────────
 # 4. Launch VSCode
 # ─────────────────────────────────────────────────────────────
-pkill -f "code" || true
+pkill -u ga -x code 2>/dev/null || true
+pkill -u ga -f "/usr/share/code|/opt/visual-studio-code|code --" 2>/dev/null || true
 sleep 1
 su - ga -c "DISPLAY=:1 code $WORKSPACE_DIR &"
 sleep 5

@@ -219,7 +219,7 @@ EOF
 chown -R ga:ga "$WORKSPACE_DIR"
 
 # Ensure pytest is installed
-sudo -u ga pip install --no-cache-dir pytest pandas numpy > /dev/null 2>&1 || true
+sudo -u ga pip install --break-system-packages --no-cache-dir pytest pandas numpy > /dev/null 2>&1 || true
 
 # Open the workspace in VS Code
 echo "Opening VS Code..."

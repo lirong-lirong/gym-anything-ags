@@ -33,9 +33,9 @@
     "duration_tolerance_sec": 1.0
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_vhs_cleanup"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

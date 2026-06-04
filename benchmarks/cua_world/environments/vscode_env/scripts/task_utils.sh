@@ -13,6 +13,12 @@ wait_for_window() {
             echo "✅ Window found after ${elapsed}s"
             return 0
         fi
+        if echo "$window_pattern" | grep -qi 'visual studio code\|code'; then
+            if wmctrl -l 2>/dev/null | grep -qi 'visual studio code\|code' || pgrep -u ga -f 'code' >/dev/null 2>&1; then
+                echo "✅ VSCode process/window found after ${elapsed}s"
+                return 0
+            fi
+        fi
         sleep 0.5
         elapsed=$((elapsed + 1))
     done
@@ -48,7 +54,9 @@ wait_for_vscode() {
 
     echo "Waiting for VSCode process..."
     while [ $elapsed -lt $timeout ]; do
-        if pgrep -f "code.*--ms-enable-electron-run-as-node" > /dev/null; then
+        if pgrep -f "code.*--ms-enable-electron-run-as-node" > /dev/null || \
+           pgrep -u ga -f "code" > /dev/null || \
+           wmctrl -l 2>/dev/null | grep -qi 'Visual Studio Code\|Code'; then
             echo "✅ VSCode process found after ${elapsed}s"
             return 0
         fi
@@ -61,7 +69,7 @@ wait_for_vscode() {
 
 # Focus VSCode window
 focus_vscode_window() {
-    local window_id=$(wmctrl -l | grep -i 'Visual Studio Code' | awk '{print $1; exit}')
+    local window_id=$(wmctrl -l | grep -i 'Visual Studio Code\|Code' | awk '{print $1; exit}')
     if [ -n "$window_id" ]; then
         wmctrl -ia "$window_id" 2>/dev/null || wmctrl -a "Visual Studio Code" 2>/dev/null
         sleep 0.3
@@ -77,8 +85,7 @@ safe_xdotool() {
     local user="$1"
     local display="$2"
     shift 2
-    su - "$user" -c "DISPLAY=$display xdotool $*" 2>&1 | grep -v "^$"
-    return ${PIPESTATUS[0]}
+    su - "$user" -c "DISPLAY=$display xdotool $*" 2>&1 | grep -v "^$" || true
 }
 
 # Kill VSCode

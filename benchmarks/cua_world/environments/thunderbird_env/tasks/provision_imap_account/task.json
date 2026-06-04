@@ -23,9 +23,9 @@
     "smtp_user": "helpdesk_user"
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_imap_provision"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

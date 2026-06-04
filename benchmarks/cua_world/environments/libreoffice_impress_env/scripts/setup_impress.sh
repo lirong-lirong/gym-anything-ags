@@ -101,34 +101,39 @@ LAUNCHEOF
     chmod +x "$home_dir/launch_impress.sh"
     echo "  - Created launch script"
 
-    # === Warm-up launch to dismiss first-run dialogs ===
-    echo "  - Performing warm-up launch to dismiss first-run dialogs..."
-    su - "$username" -c "DISPLAY=:1 setsid libreoffice --impress" &
-    local warmup_pid=$!
-    sleep 15
+    local config_file="$home_dir/.config/libreoffice/4/user/registrymodifications.xcu"
+    if [ "${GYM_ANYTHING_FAST_POST_START:-0}" = "1" ]; then
+        echo "  - GYM_ANYTHING_FAST_POST_START=1: skipping Impress GUI warm-up launch"
+    else
+        # === Warm-up launch to dismiss first-run dialogs ===
+        echo "  - Performing warm-up launch to dismiss first-run dialogs..."
+        su - "$username" -c "DISPLAY=:1 setsid libreoffice --impress" &
+        local warmup_pid=$!
+        sleep 15
 
-    # Dismiss all startup dialogs: Template Selector, Tip of the Day, etc.
-    for i in 1 2 3 4; do
-        su - "$username" -c "DISPLAY=:1 xdotool key Escape" 2>/dev/null || true
-        sleep 1
+        # Dismiss all startup dialogs: Template Selector, Tip of the Day, etc.
+        for i in 1 2 3 4; do
+            su - "$username" -c "DISPLAY=:1 xdotool key Escape" 2>/dev/null || true
+            sleep 1
+            su - "$username" -c "DISPLAY=:1 xdotool key Return" 2>/dev/null || true
+            sleep 1
+        done
+
+        # Gracefully close LibreOffice (Ctrl+Q)
+        su - "$username" -c "DISPLAY=:1 xdotool key ctrl+q" 2>/dev/null || true
+        sleep 5
+
+        # Handle "Don't Save" dialog if it appears
         su - "$username" -c "DISPLAY=:1 xdotool key Return" 2>/dev/null || true
-        sleep 1
-    done
+        sleep 2
 
-    # Gracefully close LibreOffice (Ctrl+Q)
-    su - "$username" -c "DISPLAY=:1 xdotool key ctrl+q" 2>/dev/null || true
-    sleep 5
-
-    # Handle "Don't Save" dialog if it appears
-    su - "$username" -c "DISPLAY=:1 xdotool key Return" 2>/dev/null || true
-    sleep 2
-
-    # If still running, force kill
-    pkill -f "soffice" 2>/dev/null || true
-    wait $warmup_pid 2>/dev/null || true
-    sleep 3
-    pkill -9 -f "soffice" 2>/dev/null || true
-    sleep 2
+        # If still running, force kill
+        pkill -f "soffice" 2>/dev/null || true
+        wait $warmup_pid 2>/dev/null || true
+        sleep 3
+        pkill -9 -f "soffice" 2>/dev/null || true
+        sleep 2
+    fi
 
     # Clean up recovery files to prevent Document Recovery dialog
     rm -rf "$home_dir/.config/libreoffice/4/user/backup/" 2>/dev/null || true
@@ -137,7 +142,6 @@ LAUNCHEOF
 
     # Remove only recovery entries from registrymodifications.xcu
     # Keep all other settings that LibreOffice wrote during warm-up (like mstone, TipOfTheDay, etc.)
-    local config_file="$home_dir/.config/libreoffice/4/user/registrymodifications.xcu"
     if [ -f "$config_file" ]; then
         python3 -c "
 import re
@@ -153,7 +157,7 @@ with open('$config_file', 'w') as f:
         echo "  - Removed recovery entries from config (kept first-run dismissal settings)"
     fi
 
-    echo "  - Warm-up launch complete (first-run dialogs dismissed, recovery files cleaned)"
+    echo "  - Warm-up setup complete (recovery files cleaned)"
 }
 
 # Setup for ga user (the main VNC user)

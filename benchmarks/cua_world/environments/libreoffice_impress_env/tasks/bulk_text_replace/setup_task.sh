@@ -17,7 +17,12 @@ rm -f /tmp/.~lock.* 2>/dev/null || true
 
 # Copy the real WHO Health Workforce presentation
 # This contains 29 instances of the word "workforce" across 5 slides
-cp /workspace/assets/health_workforce_report.odp /home/ga/Documents/Presentations/replace_test.odp
+if [ -f /workspace/assets/health_workforce_report.odp ]; then
+    cp /workspace/assets/health_workforce_report.odp /home/ga/Documents/Presentations/replace_test.odp
+else
+    echo "WARNING: /workspace/assets/health_workforce_report.odp missing; generating fallback presentation"
+    create_basic_impress_odp /home/ga/Documents/Presentations/replace_test.odp workforce
+fi
 chown ga:ga /home/ga/Documents/Presentations/replace_test.odp
 
 echo "Copied real data: WHO Health Workforce Report (5 slides, 29 instances of 'workforce')"

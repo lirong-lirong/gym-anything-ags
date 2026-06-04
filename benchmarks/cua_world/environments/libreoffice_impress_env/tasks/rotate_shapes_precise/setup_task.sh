@@ -87,8 +87,8 @@ page.addElement(title_frame)
 # Expected: Rotate to 90
 rect = draw.Rect(name="Controller", stylename=s_rect, width="5cm", height="3cm", x="3cm", y="6cm")
 rect_tb = draw.TextBox()
-rect.addElement(rect_tb)
 rect_tb.addElement(P(text="Controller"))
+rect.addElement(rect_tb, check_grammar=False)
 page.addElement(rect)
 
 # Label 1
@@ -104,8 +104,8 @@ arrow = draw.CustomShape(name="DataFlow", stylename=s_arrow, width="4cm", height
 geom_arrow = draw.EnhancedGeometry(type="right-arrow", viewbox="0 0 21600 21600")
 arrow.addElement(geom_arrow)
 arrow_tb = draw.TextBox()
-arrow.addElement(arrow_tb)
 arrow_tb.addElement(P(text="DataFlow"))
+arrow.addElement(arrow_tb, check_grammar=False)
 page.addElement(arrow)
 
 # Label 2
@@ -121,8 +121,8 @@ diamond = draw.CustomShape(name="IOPort", stylename=s_diamond, width="3.5cm", he
 geom_diamond = draw.EnhancedGeometry(type="diamond", viewbox="0 0 21600 21600")
 diamond.addElement(geom_diamond)
 diamond_tb = draw.TextBox()
-diamond.addElement(diamond_tb)
 diamond_tb.addElement(P(text="IOPort"))
+diamond.addElement(diamond_tb, check_grammar=False)
 page.addElement(diamond)
 
 # Label 3

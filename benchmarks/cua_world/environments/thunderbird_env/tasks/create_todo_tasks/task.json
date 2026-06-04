@@ -38,9 +38,9 @@
     ]
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_create_todo_tasks"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

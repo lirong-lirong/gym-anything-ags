@@ -275,7 +275,7 @@ EOF
 # ─────────────────────────────────────────────────────────────
 
 # Install dependencies
-pip install pytest freezegun pytest-json-report > /dev/null 2>&1
+pip install --break-system-packages pytest freezegun pytest-json-report > /dev/null 2>&1
 
 chown -R ga:ga "$WORKSPACE_DIR"
 

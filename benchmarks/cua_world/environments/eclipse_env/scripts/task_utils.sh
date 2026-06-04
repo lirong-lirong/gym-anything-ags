@@ -77,7 +77,8 @@ focus_eclipse_window() {
         echo "Eclipse window focused and maximized"
         return 0
     fi
-    return 1
+    echo "WARNING: Eclipse window not found; continuing without focusing"
+    return 0
 }
 
 # Close welcome tab in Eclipse

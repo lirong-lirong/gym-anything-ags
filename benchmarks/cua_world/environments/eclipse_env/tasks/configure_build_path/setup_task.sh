@@ -16,14 +16,14 @@ mkdir -p "$PROJECT_DIR/bin"
 
 # Download real JARs from Maven Central
 echo "Downloading dependencies..."
-wget -q -O "$PROJECT_DIR/lib/commons-lang3-3.14.0.jar" \
-    "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar"
+wget -q --timeout=30 --tries=1 -O "$PROJECT_DIR/lib/commons-lang3-3.14.0.jar" \
+    "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar" || true
 
-wget -q -O "$PROJECT_DIR/lib/gson-2.10.1.jar" \
-    "https://repo1.maven.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar"
+wget -q --timeout=30 --tries=1 -O "$PROJECT_DIR/lib/gson-2.10.1.jar" \
+    "https://repo1.maven.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar" || true
 
-wget -q -O "$PROJECT_DIR/lib/slf4j-api-2.0.9.jar" \
-    "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar"
+wget -q --timeout=30 --tries=1 -O "$PROJECT_DIR/lib/slf4j-api-2.0.9.jar" \
+    "https://repo1.maven.org/maven2/org/slf4j/slf4j-api-2.0.9/slf4j-api-2.0.9.jar" || true
 
 # Verify JARs downloaded
 for jar in commons-lang3-3.14.0.jar gson-2.10.1.jar slf4j-api-2.0.9.jar; do

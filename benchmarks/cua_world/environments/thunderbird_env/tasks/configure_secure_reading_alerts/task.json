@@ -22,9 +22,9 @@
     "expected_read_delay_interval": 5
   },
   "success": {
-    "mode": "program",
+    "mode": "vlm_checklist",
     "spec": {
-      "program": "verifier.py::verify_configure_secure_reading_alerts"
+      "checklist": "vlm_checklist.json"
     }
   }
 }

@@ -793,7 +793,8 @@ chown -R ga:ga "$WORKSPACE_DIR"
 # 8. Launch VS Code
 # ──────────────────────────────────────────────────────────
 echo "Starting VS Code..."
-pkill -f "code" 2>/dev/null || true
+pkill -u ga -x code 2>/dev/null || true
+pkill -u ga -f "/usr/share/code|/opt/visual-studio-code|code --" 2>/dev/null || true
 sleep 2
 
 sudo -u ga DISPLAY=:1 code "$WORKSPACE_DIR"
