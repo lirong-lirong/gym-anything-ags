@@ -178,16 +178,16 @@ result = {
     "task_start": $TASK_START,
     "task_end": $TASK_END,
     "blend_file": {
-        "exists": $( [ "$BLEND_EXISTS" = "true" ] && echo "true" || echo "false" ),
+        "exists": "$BLEND_EXISTS" == "true",
         "size": $BLEND_SIZE,
-        "valid": $( [ "$BLEND_VALID" = "true" ] && echo "true" || echo "false" )
+        "valid": "$BLEND_VALID" == "true"
     },
     "render_file": {
-        "exists": $( [ "$RENDER_EXISTS" = "true" ] && echo "true" || echo "false" ),
+        "exists": "$RENDER_EXISTS" == "true",
         "size": $RENDER_SIZE,
         "width": $RENDER_WIDTH,
         "height": $RENDER_HEIGHT,
-        "created_after_start": $( [ "$RENDER_AFTER_START" = "true" ] && echo "true" || echo "false" )
+        "created_after_start": "$RENDER_AFTER_START" == "true"
     },
     "scene_analysis": analysis,
     "screenshot_path": "/tmp/task_final.png",

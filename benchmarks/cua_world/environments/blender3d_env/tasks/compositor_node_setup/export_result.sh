@@ -187,15 +187,15 @@ result = {
     "task_end_time": int("$TASK_END"),
     "compositor_analysis": compositor,
     "render_output": {
-        "exists": $( [ "$RENDER_EXISTS" = "true" ] && echo "true" || echo "false" ),
+        "exists": "$RENDER_EXISTS" == "true",
         "size_kb": $RENDER_SIZE_KB,
         "width": $RENDER_WIDTH,
         "height": $RENDER_HEIGHT,
         "mtime": int("$RENDER_TIME")
     },
     "blend_file": {
-        "exists": $( [ "$BLEND_EXISTS" = "true" ] && echo "true" || echo "false" ),
-        "valid": $( [ "$BLEND_VALID" = "true" ] && echo "true" || echo "false" ),
+        "exists": "$BLEND_EXISTS" == "true",
+        "valid": "$BLEND_VALID" == "true",
         "size_kb": $BLEND_SIZE_KB,
         "mtime": int("$BLEND_MTIME") if "$BLEND_EXISTS" == "true" else 0
     }
