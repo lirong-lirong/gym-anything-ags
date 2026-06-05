@@ -20,7 +20,7 @@ from typing import Any, Dict, Iterable, List, Optional
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 DEFAULT_DATA_ROOT = Path("/tmp/cua-data/cua_world_ags_output_osworld_format_no_heavyinstall")
-DEFAULT_RUN_ROOT = Path("/data/home/pengdrumli/hy/handoff/ags_mock_smoke_runs")
+DEFAULT_RUN_ROOT = Path("ags_mock_smoke_runs")
 ENV_ROOT = REPO / "benchmarks/cua_world/environments"
 DEFAULT_TARGET_ENVS = {
     "firefox_env",
