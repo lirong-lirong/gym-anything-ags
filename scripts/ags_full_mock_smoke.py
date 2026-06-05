@@ -561,7 +561,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA_ROOT)
     parser.add_argument("--task-source", choices=("parquet", "registry"), default="parquet")
-    parser.add_argument("--surface", choices=("raw", "verified"), default="verified")
+    parser.add_argument("--surface", choices=("raw", "verified", "ags_stable"), default="verified")
     parser.add_argument("--split", default="all")
     parser.add_argument("--run-root", type=Path, default=DEFAULT_RUN_ROOT)
     parser.add_argument("--run-id", default=None)

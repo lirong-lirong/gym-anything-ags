@@ -143,6 +143,18 @@ PYTHONPATH=src:. python3 scripts/ags_full_mock_smoke.py \
   --list-only
 ```
 
+示例：列出当前 AGS 稳定任务集，不运行沙箱：
+
+```bash
+PYTHONPATH=src:. python3 scripts/ags_full_mock_smoke.py \
+  --task-source registry \
+  --surface ags_stable \
+  --split all \
+  --all-envs \
+  --template "$GYM_ANYTHING_AGS_TEMPLATE" \
+  --list-only
+```
+
 示例：并发运行指定 env 的 smoke：
 
 ```bash
@@ -188,6 +200,20 @@ PYTHONPATH=src:. python3 scripts/ags_full_mock_smoke.py \
 - Total: `1083`
 
 当前 validated manifest 中的 `split` 字段统一写为 `all`；上面的 train/test 数量是用 `env + task_id` 回查 `benchmarks/cua_world/splits/*_split.json` 得到的。没有 unmapped task，也没有 train/test 重叠。
+
+这批任务已经放入 GA 仓库 split：
+
+- 文件：`benchmarks/cua_world/splits/ags_stable_20260604.json`
+- Registry surface：`ags_stable`
+- 可用 split：`all`、`train`、`test`、`ags_stable`
+- 任务数：`1083`，其中 train `867`，test `216`
+- Env 数：`26`
+- 任务来源：`registry:verified`
+- 运行器：`ags`
+- 候选镜像：`ccr.ccs.tencentyun.com/pengdrumli/ags-ga-cua-world-full:registry-highres-nodocker-main-fastpost-eclipse-maven-blender-r-20260604-1918`
+- 镜像 digest：`sha256:1334124b96d9bff1b6136a62003906f396cf5f7660cda54f0eccf7fbe7516396`
+- AGS tool：`ags-cua-blender-r-202606041920`
+- AGS tool id：`sdt-8sbro0z3`
 
 已提交到仓库的主要修复：
 

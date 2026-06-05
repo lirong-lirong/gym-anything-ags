@@ -131,6 +131,68 @@ class BenchmarkRegistryTests(unittest.TestCase):
                 ["task_b"],
             )
 
+    def test_get_tasks_for_environment_reads_ags_stable_surface(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            environments_root = root / "benchmarks" / "cua_world" / "environments"
+            splits_root = root / "benchmarks" / "cua_world" / "splits"
+            env_dir = environments_root / "demo_env"
+            for task_id in ("task_a", "task_b", "task_c"):
+                (env_dir / "tasks" / task_id).mkdir(parents=True)
+
+            _write_json(
+                splits_root / "demo_split.json",
+                {
+                    "env_folder": "benchmarks/cua_world/environments/demo_env",
+                    "train_tasks": ["task_a", "task_b"],
+                    "test_tasks": ["task_c"],
+                    "all_tasks": ["task_a", "task_b", "task_c"],
+                },
+            )
+            _write_json(
+                splits_root / "ags_stable_20260604.json",
+                {
+                    "by_environment": {
+                        "demo_env": {
+                            "all": ["task_b", "task_c"],
+                            "train": ["task_b"],
+                            "test": ["task_c"],
+                        }
+                    },
+                },
+            )
+
+            self.assertEqual(
+                get_tasks_for_environment(
+                    "demo_env",
+                    split="all",
+                    surface="ags_stable",
+                    splits_root=splits_root,
+                    environments_root=environments_root,
+                ),
+                ["task_b", "task_c"],
+            )
+            self.assertEqual(
+                get_tasks_for_environment(
+                    "demo_env",
+                    split="train",
+                    surface="ags_stable",
+                    splits_root=splits_root,
+                    environments_root=environments_root,
+                ),
+                ["task_b"],
+            )
+            self.assertEqual(
+                get_tasks_for_environment(
+                    "demo_env",
+                    split="test",
+                    surface="ags_stable",
+                    splits_root=splits_root,
+                    environments_root=environments_root,
+                ),
+                ["task_c"],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

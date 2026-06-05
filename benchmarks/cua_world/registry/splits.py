@@ -54,6 +54,32 @@ def _load_verified_tasks_by_environment(splits_root: Path) -> Dict[str, List[str
     return normalized
 
 
+def _load_named_surface_splits(splits_root: Path, surface: str) -> Dict[str, Dict[str, List[str]]]:
+    candidates = sorted(splits_root.glob(f"{surface}_*.json"))
+    if not candidates:
+        return {}
+    surface_path = candidates[-1]
+    data = _load_json(surface_path)
+    by_environment = data.get("by_environment", {})
+    if not isinstance(by_environment, dict):
+        return {}
+
+    normalized: Dict[str, Dict[str, List[str]]] = {}
+    for env_name, split_data in by_environment.items():
+        if not isinstance(env_name, str) or not isinstance(split_data, dict):
+            continue
+        env_splits: Dict[str, List[str]] = {}
+        for split_name, task_ids in split_data.items():
+            if isinstance(split_name, str) and isinstance(task_ids, list):
+                env_splits[split_name] = _dedupe_preserve_order(str(task_id) for task_id in task_ids)
+        if env_splits:
+            env_splits.setdefault("all", _dedupe_preserve_order(env_splits.get("train", []) + env_splits.get("test", [])))
+            env_splits.setdefault("train", [])
+            env_splits.setdefault("test", [])
+            normalized[env_name] = env_splits
+    return normalized
+
+
 def _extract_additional_splits(data: Mapping[str, object]) -> Dict[str, List[str]]:
     additional: Dict[str, List[str]] = {}
 
@@ -124,8 +150,8 @@ def load_environment_task_splits(
     splits_root: Path = DEFAULT_SPLITS_ROOT,
     environments_root: Path = DEFAULT_ENVIRONMENTS_ROOT,
 ) -> Dict[str, Dict[str, List[str]]]:
-    if surface not in {"raw", "verified"}:
-        raise ValueError(f"surface must be 'raw' or 'verified', got {surface!r}")
+    if surface not in {"raw", "verified", "ags_stable"}:
+        raise ValueError(f"surface must be 'raw', 'verified', or 'ags_stable', got {surface!r}")
 
     splits_root = Path(splits_root)
     environments_root = Path(environments_root)
@@ -148,7 +174,21 @@ def load_environment_task_splits(
         }
 
     verified_by_environment = _load_verified_tasks_by_environment(splits_root)
+    named_surface_splits = _load_named_surface_splits(splits_root, surface) if surface == "ags_stable" else {}
     for env_name, split_data in list(registry.items()):
+        if surface == "ags_stable":
+            if env_name not in named_surface_splits:
+                del registry[env_name]
+                continue
+            stable_splits = named_surface_splits[env_name]
+            registry[env_name] = {
+                "all": list(stable_splits.get("all", [])),
+                "train": list(stable_splits.get("train", [])),
+                "test": list(stable_splits.get("test", [])),
+                "ags_stable": list(stable_splits.get("all", [])),
+            }
+            continue
+
         supported_tasks = set(verified_by_environment.get(env_name, []))
         split_names = list(split_data.keys())
         if "verified" not in split_names:
@@ -180,7 +220,7 @@ def load_environment_task_splits(
         registry[env_name] = filtered
 
     for env_name, task_ids in verified_by_environment.items():
-        if env_name in registry:
+        if surface == "ags_stable" or env_name in registry:
             continue
         registry[env_name] = {
             "all": list(task_ids) if surface == "verified" else [],
@@ -188,6 +228,17 @@ def load_environment_task_splits(
             "test": [],
             "verified": list(task_ids),
         }
+
+    if surface == "ags_stable":
+        for env_name, stable_splits in named_surface_splits.items():
+            if env_name in registry:
+                continue
+            registry[env_name] = {
+                "all": list(stable_splits.get("all", [])),
+                "train": list(stable_splits.get("train", [])),
+                "test": list(stable_splits.get("test", [])),
+                "ags_stable": list(stable_splits.get("all", [])),
+            }
 
     return {env_name: registry[env_name] for env_name in sorted(registry)}
 
