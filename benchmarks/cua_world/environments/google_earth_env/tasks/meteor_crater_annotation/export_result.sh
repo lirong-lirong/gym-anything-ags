@@ -114,6 +114,10 @@ python3 << PYEOF
 import json
 import base64
 
+true = True
+false = False
+null = None
+
 result = {
     "task_start": $TASK_START,
     "task_end": $TASK_END,

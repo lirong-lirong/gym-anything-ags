@@ -137,6 +137,10 @@ echo "Research notes: exists=$NOTES_EXISTS, has_stonehenge=$NOTES_HAS_STONEHENGE
 python3 << PYEOF
 import json
 
+true = True
+false = False
+null = None
+
 config = json.loads('''$CONFIG_JSON''')
 
 result = {

@@ -453,7 +453,7 @@ def run_one(task: Dict[str, Any], args: argparse.Namespace, run_root: Path) -> D
     log_text = log_path.read_text(encoding="utf-8", errors="replace") if log_path.exists() else ""
     stage_timings = _parse_stage_timings(log_text)
     hook_failures = []
-    for marker in ("post_start hook failed", "pre_task hook failed"):
+    for marker in ("post_start hook failed", "pre_task hook failed", "post_task hook failed"):
         if marker in log_text:
             hook_failures.append(marker)
     result = {

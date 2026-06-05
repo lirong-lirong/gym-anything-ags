@@ -125,6 +125,10 @@ echo "VFX notes: exists=$VFX_NOTES_EXISTS, has_moon=$VFX_NOTES_HAS_MOON, has_jup
 python3 << PYEOF
 import json
 
+true = True
+false = False
+null = None
+
 config = json.loads('''$CONFIG_JSON''')
 
 result = {

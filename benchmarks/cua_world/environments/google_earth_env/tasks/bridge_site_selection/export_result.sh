@@ -106,7 +106,7 @@ PYEOF
 
     # Extract target placemark info
     if [ -f /tmp/placemark_data.json ]; then
-        PLACEMARK_INFO=$(python3 << 'PYEOF' 2>/dev/null || echo '{}')
+        PLACEMARK_INFO=$(python3 2>/dev/null << 'PYEOF'
 import json
 import re
 
@@ -151,7 +151,7 @@ else:
 
 print(json.dumps(result))
 PYEOF
-        )
+        ) || PLACEMARK_INFO='{}'
         
         PLACEMARK_FOUND=$(echo "$PLACEMARK_INFO" | python3 -c "import json,sys; print(str(json.load(sys.stdin).get('found', False)).lower())" 2>/dev/null || echo "false")
         if [ "$PLACEMARK_FOUND" = "true" ]; then

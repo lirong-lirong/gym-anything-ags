@@ -69,6 +69,10 @@ python3 << EOF
 import json
 import os
 
+true = True
+false = False
+null = None
+
 result = {
     "tool_visits": $TOOL_VISITS,
     "bookmark_folder_exists": $BOOKMARK_FOLDER_EXISTS,

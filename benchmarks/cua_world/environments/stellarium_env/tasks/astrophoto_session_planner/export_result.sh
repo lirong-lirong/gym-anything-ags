@@ -149,6 +149,10 @@ echo "Session notes: exists=$SESSION_NOTES_EXISTS, has_ngc=$SESSION_NOTES_HAS_NG
 python3 << PYEOF
 import json, sys
 
+true = True
+false = False
+null = None
+
 config = json.loads('''$CONFIG_JSON''')
 
 result = {

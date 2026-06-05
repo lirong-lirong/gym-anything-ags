@@ -72,6 +72,8 @@ PLACEMARK_FOUND="false"
 PLACEMARK_NAME=""
 PLACEMARK_COORDS=""
 PLACEMARK_DESCRIPTION=""
+PLACEMARK_LAT="0"
+PLACEMARK_LON="0"
 
 if [ -f /tmp/myplaces_final.kml ]; then
     # Use Python to parse KML and extract placemark info

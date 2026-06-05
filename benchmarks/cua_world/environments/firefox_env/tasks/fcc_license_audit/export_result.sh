@@ -42,6 +42,10 @@ import shutil
 import os
 import sys
 
+true = True
+false = False
+null = None
+
 # Setup paths
 places_db = "$PLACES_DB"
 temp_db = "/tmp/places_export.sqlite"

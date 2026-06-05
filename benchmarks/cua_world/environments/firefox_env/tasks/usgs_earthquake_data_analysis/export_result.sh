@@ -136,6 +136,10 @@ python3 << PYEOF
 import json
 import os
 
+true = True
+false = False
+null = None
+
 result = {
     "csv_exists": $CSV_EXISTS,
     "csv_fresh": $CSV_FRESH,

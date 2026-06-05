@@ -122,6 +122,10 @@ echo "Nav log: exists=$NAV_LOG_EXISTS, polaris=$NAV_LOG_HAS_POLARIS, sirius=$NAV
 python3 << PYEOF
 import json
 
+true = True
+false = False
+null = None
+
 config = json.loads('''$CONFIG_JSON''')
 
 result = {

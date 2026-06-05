@@ -59,7 +59,12 @@ fi
 PDF_COUNT=0
 DOWNLOADED_FILES=""
 
-# Find files: in Downloads, ending in .pdf (case insensitive), newer than task start
+# Find files: in Downloads, ending in .pdf (case insensitive), newer than task start.
+# Use a temp list instead of process substitution because AGS command execution may not expose /dev/fd.
+PDF_LIST=$(mktemp /tmp/dailymed_pdfs.XXXXXX)
+TASK_START_REF=$(mktemp /tmp/dailymed_task_start.XXXXXX)
+touch -d "@$TASK_START" "$TASK_START_REF" 2>/dev/null || touch "$TASK_START_REF"
+find /home/ga/Downloads -type f -iname "*.pdf" -newer "$TASK_START_REF" > "$PDF_LIST" 2>/dev/null || true
 while IFS= read -r file; do
     if [ -f "$file" ]; then
         SIZE=$(stat -c %s "$file")
@@ -69,7 +74,8 @@ while IFS= read -r file; do
             DOWNLOADED_FILES="$DOWNLOADED_FILES,$(basename "$file")"
         fi
     fi
-done < <(find /home/ga/Downloads -type f -iname "*.pdf" -newer /tmp/task_start_time.txt 2>/dev/null)
+done < "$PDF_LIST"
+rm -f "$PDF_LIST" "$TASK_START_REF"
 
 # 6. Analyze JSON Output File Metadata (Content analyzed by verifier.py)
 JSON_PATH="/home/ga/Documents/medication_reference.json"

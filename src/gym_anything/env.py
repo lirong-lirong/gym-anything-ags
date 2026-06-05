@@ -912,6 +912,7 @@ class GymAnythingEnv:
     def _run_post_task_hook(self) -> None:
         if not (self.task_spec and self.task_spec.hooks and self.task_spec.hooks.post_task):
             return
+        logger.info("Running post_task hook")
         try:
             hook_cmd = self.task_spec.hooks.post_task
             if self._platform_family() == "android":
@@ -921,8 +922,9 @@ class GymAnythingEnv:
             else:
                 hook_script = self._linux_hook_script(hook_cmd, "/home/ga/task_post_task.log")
                 self._runner.exec(f"bash -lc {shlex.quote(hook_script)}")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("post_task hook failed: %s", e)
+            raise
 
     def _post_task_settle_seconds(self) -> float:
         has_post_task_hook = bool(

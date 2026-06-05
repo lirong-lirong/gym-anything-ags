@@ -20,7 +20,11 @@ import json
 import os
 import zipfile
 from odf import opendocument, text, draw, style
-from odf.namespaces import DRAWNS, TEXTNS, STYLENS, FOXNS
+from odf.namespaces import DRAWNS, TEXTNS, STYLENS
+try:
+    from odf.namespaces import FOXNS
+except ImportError:
+    FOXNS = 'http://www.w3.org/1999/XSL/Format'
 
 result = {
     'file_exists': False,
@@ -150,16 +154,21 @@ else
 fi
 
 # 4. Create Final Result JSON
-# Merge python analysis with file stats
-jq -n \
-    --argfile analysis /tmp/analysis_result.json \
-    --arg modified "$FILE_MODIFIED" \
-    --arg screenshot "/tmp/task_final.png" \
-    '{
-        analysis: $analysis,
-        file_modified_during_task: ($modified == "true"),
-        screenshot_path: $screenshot
-    }' > /tmp/task_result.json
+# Merge python analysis with file stats. Use Python instead of jq --argfile for older jq builds.
+FILE_MODIFIED="$FILE_MODIFIED" python3 - <<'PYEOF' > /tmp/task_result.json
+import json
+import os
+import sys
+
+with open("/tmp/analysis_result.json", "r", encoding="utf-8") as f:
+    analysis = json.load(f)
+
+json.dump({
+    "analysis": analysis,
+    "file_modified_during_task": os.environ.get("FILE_MODIFIED") == "true",
+    "screenshot_path": "/tmp/task_final.png",
+}, sys.stdout)
+PYEOF
 
 echo "Export complete. Result:"
 cat /tmp/task_result.json

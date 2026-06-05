@@ -52,6 +52,10 @@ import os
 import re
 import sys
 
+true = True
+false = False
+null = None
+
 # Paths
 prefs_file = "$PREFS_FILE"
 report_file = "$REPORT_FILE"

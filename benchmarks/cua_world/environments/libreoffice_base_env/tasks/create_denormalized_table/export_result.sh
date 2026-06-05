@@ -2,6 +2,8 @@
 set -e
 echo "=== Exporting create_denormalized_table results ==="
 
+source /workspace/scripts/task_utils.sh
+
 ODB_PATH="/home/ga/chinook.odb"
 TASK_START=$(cat /tmp/task_start_time.txt 2>/dev/null || echo "0")
 

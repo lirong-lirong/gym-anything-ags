@@ -64,6 +64,10 @@ python3 -c "
 import json
 import os
 
+true = True
+false = False
+null = None
+
 result = {
     'task_start': $TASK_START,
     'csv_exists': $CSV_EXISTS,

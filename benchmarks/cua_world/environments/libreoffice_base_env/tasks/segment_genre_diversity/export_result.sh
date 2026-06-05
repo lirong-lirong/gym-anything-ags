@@ -33,6 +33,10 @@ import json
 import os
 import sys
 
+true = True
+false = False
+null = None
+
 # Paths
 odb_path = '/home/ga/chinook.odb'
 sqlite_path = '/opt/libreoffice_base_samples/Chinook_Sqlite.sqlite'

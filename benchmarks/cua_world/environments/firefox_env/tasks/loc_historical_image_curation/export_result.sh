@@ -100,6 +100,10 @@ cat > /tmp/create_result.py << PYEOF
 import json
 import os
 
+true = True
+false = False
+null = None
+
 result = {
     "task_start": $TASK_START,
     "dir_exists": $DIR_EXISTS,
