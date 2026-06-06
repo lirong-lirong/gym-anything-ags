@@ -51,10 +51,22 @@ class AGSRunner(BaseRunner):
                 "AGSRunner requires a template/tool name. Set GYM_ANYTHING_AGS_TEMPLATE "
                 "or GYM_ANYTHING_AGS_TOOL_NAME."
             )
-        if not os.environ.get("E2B_API_KEY"):
-            raise RuntimeError("AGSRunner requires E2B_API_KEY in the environment.")
-        if not os.environ.get("E2B_DOMAIN"):
-            raise RuntimeError("AGSRunner requires E2B_DOMAIN, e.g. ap-guangzhou.tencentags.com.")
+        # Credentials: AGS_API_KEY / AGS_DOMAIN are the canonical names (shared
+        # with the OSWorld AGS provider, see
+        # nexus/extensions/tasks/osworld/generator.py::_build_runtime_provider_config);
+        # E2B_API_KEY / E2B_DOMAIN are accepted as fallbacks for backwards
+        # compatibility with older deployments.
+        api_key = os.environ.get("AGS_API_KEY") or os.environ.get("E2B_API_KEY")
+        domain = os.environ.get("AGS_DOMAIN") or os.environ.get("E2B_DOMAIN")
+        if not api_key:
+            raise RuntimeError(
+                "AGSRunner requires AGS_API_KEY (or fallback E2B_API_KEY) in the environment."
+            )
+        if not domain:
+            raise RuntimeError(
+                "AGSRunner requires AGS_DOMAIN (or fallback E2B_DOMAIN), "
+                "e.g. ap-guangzhou.tencentags.com."
+            )
 
         try:
             from e2b import Sandbox
@@ -71,6 +83,8 @@ class AGSRunner(BaseRunner):
                     secure=True,
                     allow_internet_access=True,
                     request_timeout=self._create_timeout,
+                    api_key=api_key,
+                    domain=domain,
                 )
                 break
             except Exception as exc:
