@@ -23,7 +23,11 @@ IMAGE_URL="https://upload.wikimedia.org/wikipedia/commons/3/35/Greenscreen_06.jp
 DEST_FILE="$ASSETS_DIR/greenscreen_plate.jpg"
 
 echo "Downloading green screen plate..."
-if wget -q -O "$DEST_FILE" "$IMAGE_URL"; then
+# Constrain wget so it bails before the AGS exec deadline (default 600s) when
+# the upstream URL is unreachable from the sandbox region (e.g.
+# upload.wikimedia.org from ap-guangzhou). The fallback ImageMagick generator
+# below produces a usable synthetic plate when the download fails.
+if wget -q --timeout=15 --tries=1 -O "$DEST_FILE" "$IMAGE_URL"; then
     echo "Download successful."
 else
     echo "Download failed. Generating high-contrast fallback..."

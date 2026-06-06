@@ -183,16 +183,16 @@ except Exception as e:
 result = {
     "task_start_time": $TASK_START,
     "blend_file": {
-        "exists": "$BLEND_EXISTS" == "true",
+        "exists": $( [ "$BLEND_EXISTS" = "true" ] && echo "True" || echo "False" ),
         "mtime": $BLEND_MTIME,
         "newer_than_start": $BLEND_MTIME > $TASK_START
     },
     "render_file": {
-        "exists": "$RENDER_EXISTS" == "true",
+        "exists": $( [ "$RENDER_EXISTS" = "true" ] && echo "True" || echo "False" ),
         "mtime": $RENDER_MTIME,
         "size_bytes": $RENDER_SIZE,
         "size_kb": round($RENDER_SIZE / 1024, 2),
-        "valid_image": "$RENDER_VALID".lower() == "true",
+        "valid_image": "$RENDER_VALID" == "True",
         "width": $RENDER_WIDTH,
         "height": $RENDER_HEIGHT,
         "newer_than_start": $RENDER_MTIME > $TASK_START
